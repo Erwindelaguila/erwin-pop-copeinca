@@ -1,103 +1,117 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useAppContext } from "@/lib/store"
+import type { UserRole } from "@/lib/types"
+
+export default function HomePage() {
+  const [selectedRole, setSelectedRole] = useState<UserRole | "">("")
+  const [selectedUser, setSelectedUser] = useState<string>("")
+  const { dispatch } = useAppContext()
+  const router = useRouter()
+
+  const getValidatorOptions = () => [
+    { id: "1", name: "Erwin del Aguila" },
+    { id: "2", name: "Ivan Sanchez" },
+  ]
+
+  const handleLogin = () => {
+    if (!selectedRole) return
+
+    // Solo validar usuario seleccionado si es validador
+    if (selectedRole === "validador" && !selectedUser) return
+
+    let user
+    if (selectedRole === "validador") {
+      const validatorData = getValidatorOptions().find((u) => u.id === selectedUser)
+      if (!validatorData) return
+      user = {
+        id: selectedUser,
+        name: validatorData.name,
+        role: selectedRole,
+      }
+    } else {
+      // Para otros roles, usar IDs fijos
+      const roleUsers = {
+        elaborador: { id: "1", name: "Juan Pérez" },
+        revisor: { id: "2", name: "María García" },
+        aprobador: { id: "3", name: "Carlos López" },
+      }
+      user = {
+        ...roleUsers[selectedRole as keyof typeof roleUsers],
+        role: selectedRole,
+      }
+    }
+
+    dispatch({ type: "SET_USER", payload: user })
+    router.push(`/${selectedRole}`)
+  }
+
+  const validatorOptions = getValidatorOptions()
+  const needsUserSelection = selectedRole === "validador"
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen bg-[#00363B] flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center space-y-4">
+          <div className="flex justify-center">
+            <Image src="/logo-copeinca-write.png" alt="Copeinca" width={120} height={40} className="h-12 w-auto" />
+          </div>
+          <CardTitle className="text-2xl font-bold text-[#00363B]">Sistema de Gestión de Documentos</CardTitle>
+          <p className="text-[#4B5C6B]">Selecciona tu rol para acceder al sistema</p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div>
+            <Select
+              value={selectedRole}
+              onValueChange={(value: UserRole) => {
+                setSelectedRole(value)
+                setSelectedUser("") // Reset user selection when role changes
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Seleccione su rol" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="elaborador">Elaborador</SelectItem>
+                <SelectItem value="revisor">Revisor</SelectItem>
+                <SelectItem value="validador">Validador</SelectItem>
+                <SelectItem value="aprobador">Aprobador</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          {needsUserSelection && (
+            <div>
+              <Select value={selectedUser} onValueChange={setSelectedUser}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Seleccione el usuario validador" />
+                </SelectTrigger>
+                <SelectContent>
+                  {validatorOptions.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <Button
+            onClick={handleLogin}
+            disabled={!selectedRole || (needsUserSelection && !selectedUser)}
+            className="w-full bg-[#00363B] hover:bg-[#00363B]/90 text-white"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+            Ingresar al Sistema
+          </Button>
+        </CardContent>
+      </Card>
     </div>
-  );
+  )
 }
