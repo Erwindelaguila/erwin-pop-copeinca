@@ -150,6 +150,59 @@ export default function ElaboradorPage() {
     return request.tipoOriginal ? "El revisor ha sugerido un cambio de tipo" : "Su solicitud ha sido aprobada"
   }
 
+  // Acciones directas para aprobar/rechazar desde la tabla cuando viene de validación
+  const handleAcceptChangeDirect = (request: any) => {
+    if (!request || !state.user) return;
+    dispatch({
+      type: "UPDATE_REQUEST",
+      payload: {
+        id: request.id,
+        updates: {
+          status: "en_desarrollo",
+        },
+      },
+    });
+    dispatch({
+      type: "ADD_HISTORY",
+      payload: {
+        requestId: request.id,
+        entry: {
+          accion: "cambio_aceptado",
+          usuario: state.user.name,
+          fecha: new Date().toISOString(),
+          detalles: "Validación aceptada - documento listo para envío final",
+        },
+      },
+    });
+    toast.success("Validación aceptada");
+  };
+
+  const handleRejectChangeDirect = (request: any) => {
+    if (!request || !state.user) return;
+    dispatch({
+      type: "UPDATE_REQUEST",
+      payload: {
+        id: request.id,
+        updates: {
+          status: "rechazado",
+        },
+      },
+    });
+    dispatch({
+      type: "ADD_HISTORY",
+      payload: {
+        requestId: request.id,
+        entry: {
+          accion: "rechazado",
+          usuario: state.user.name,
+          fecha: new Date().toISOString(),
+          detalles: "Solicitud rechazada por el elaborador tras validación",
+        },
+      },
+    });
+    toast.error("La solicitud ha sido rechazada");
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -207,13 +260,47 @@ export default function ElaboradorPage() {
 
       <RequestsTable
         data={displayedRequests}
-        onReview={activeTab === "pendiente" ? (request) => setSelectedRequest(request) : undefined}
         showActions={true}
         isHistorial={activeTab === "historial"}
+        customActions={
+          activeTab === "pendiente"
+            ? (request) => {
+                // Si viene de validación de tipo, mostrar Aprobar/Rechazar
+                if (
+                  request.status === "pendiente" &&
+                  Array.isArray(request.historial) &&
+                  request.historial.some((h) => h.accion === "validacion_aprobada")
+                ) {
+                  return (
+                    <div className="flex gap-2">
+                      <Button size="sm" className="bg-[#00363B] hover:bg-[#00363B]/90" onClick={() => handleAcceptChangeDirect(request)}>
+                        Aprobar
+                      </Button>
+                      <Button size="sm" variant="destructive" onClick={() => handleRejectChangeDirect(request)}>
+                        Rechazar
+                      </Button>
+                    </div>
+                  );
+                }
+                // Si viene de validación de documento (aprobado) o cambio de tipo, mostrar Revisar
+                if (
+                  request.status === "pendiente" &&
+                  (request.tipoOriginal || (Array.isArray(request.historial) && request.historial.some((h) => h.accion === "aprobado")))
+                ) {
+                  return (
+                    <Button size="sm" className="bg-[#00363B] hover:bg-[#00363B]/90" onClick={() => setSelectedRequest(request)}>
+                      Revisar
+                    </Button>
+                  );
+                }
+                return undefined;
+              }
+            : undefined
+        }
       />
 
-      {/* Modal de aceptación mejorado */}
-      {selectedRequest && (
+      {/* Modal de aceptación solo para otros casos, no cuando viene de validación de tipo */}
+      {selectedRequest && !(selectedRequest.status === "pendiente" && Array.isArray(selectedRequest.historial) && selectedRequest.historial.some((h: any) => h.accion === "validacion_aprobada")) && (
         <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
           <DialogContent className="max-w-lg">
             <DialogHeader className="pb-4">
@@ -221,29 +308,28 @@ export default function ElaboradorPage() {
                 {getModalTitle(selectedRequest)}
               </DialogTitle>
             </DialogHeader>
-
+            {/* Contenido del modal */}
             <div className="space-y-6">
-              {/* Header con número de documento */}
-              <div className="bg-gradient-to-r from-[#00363B] to-[#004d54] text-white p-4 rounded-lg text-center">
-                <p className="text-lg font-medium">{selectedRequest.numero}</p>
-                <p className="text-sm opacity-90 mt-1">{getModalDescription(selectedRequest)}</p>
+              {/* Cabecera institucional arriba del bloque visual */}
+              <div className="rounded-xl bg-gradient-to-r from-[#174449] to-[#20575e] text-white text-center px-4 py-3 mb-2">
+                <div className="text-lg font-bold tracking-wide">{selectedRequest.numero}</div>
+                <div className="text-sm mt-0.5 font-normal">
+                  {selectedRequest.tipoOriginal
+                    ? "El revisor ha sugerido un cambio de tipo"
+                    : "Su solicitud ha sido aprobada"}
+                </div>
               </div>
-
-              {/* Contenido del cambio */}
+              {/* Visualización diferenciada según si hay cambio de tipo */}
               {selectedRequest.tipoOriginal ? (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
-                    <div className="text-center flex-1">
-                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Tipo Original</p>
-                      <p className="text-lg font-semibold text-orange-600">
-                        {getTypeLabel(selectedRequest.tipoOriginal)}
-                      </p>
-                    </div>
-                    <ArrowRight className="h-5 w-5 text-gray-400 mx-4" />
-                    <div className="text-center flex-1">
-                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Tipo Sugerido</p>
-                      <p className="text-lg font-semibold text-green-600">{getTypeLabel(selectedRequest.tipo)}</p>
-                    </div>
+                <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
+                  <div className="text-center flex-1">
+                    <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Tipo Original</p>
+                    <p className="text-lg font-semibold text-orange-600">{getTypeLabel(selectedRequest.tipoOriginal)}</p>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-gray-400 mx-4" />
+                  <div className="text-center flex-1">
+                    <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Tipo Sugerido</p>
+                    <p className="text-lg font-semibold text-green-600">{getTypeLabel(selectedRequest.tipo)}</p>
                   </div>
                 </div>
               ) : (
@@ -253,23 +339,40 @@ export default function ElaboradorPage() {
                   <p className="text-sm text-green-600 mt-1">Listo para desarrollo</p>
                 </div>
               )}
-
-              {/* Botones */}
-              <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                <Button variant="outline" onClick={() => setSelectedRequest(null)} className="px-6">
-                  Cancelar
-                </Button>
-                <div className="flex space-x-3">
-                  <Button onClick={handleRejectChange} variant="destructive" className="px-6">
-                    <XCircle className="h-4 w-4 mr-2" />
-                    Rechazar
+              {/* Si viene de validación de documento (aprobado) o cambio de tipo, mostrar botones de acción */}
+              {selectedRequest.status === "pendiente" && (selectedRequest.tipoOriginal || (Array.isArray(selectedRequest.historial) && selectedRequest.historial.some((h: any) => h.accion === "aprobado"))) ? (
+                <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                  <Button variant="outline" onClick={() => setSelectedRequest(null)} className="px-6">
+                    Cancelar
                   </Button>
-                  <Button onClick={handleAcceptChange} className="bg-[#00363B] hover:bg-[#00363B]/90 px-6">
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Aceptar
-                  </Button>
+                  <div className="flex space-x-3">
+                    <Button onClick={handleAcceptChange} className="bg-[#00363B] hover:bg-[#00363B]/90 px-6 text-white">
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Aprobar
+                    </Button>
+                    <Button onClick={handleRejectChange} variant="destructive" className="px-6">
+                      <XCircle className="h-4 w-4 mr-2" />
+                      Rechazar
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                  <Button variant="outline" onClick={() => setSelectedRequest(null)} className="px-6">
+                    Cancelar
+                  </Button>
+                  <div className="flex space-x-3">
+                    <Button onClick={handleRejectChange} variant="destructive" className="px-6">
+                      <XCircle className="h-4 w-4 mr-2" />
+                      Rechazar
+                    </Button>
+                    <Button onClick={handleAcceptChange} className="bg-[#00363B] hover:bg-[#00363B]/90 px-6">
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Aprobar
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </DialogContent>
         </Dialog>

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
@@ -13,6 +13,7 @@ import { useAppContext, getTypeLabel } from "@/lib/store"
 import { RequestsTable } from "@/components/requests-table"
 import { validators } from "@/lib/validators"
 import { FileText, Users, MessageSquare, ExternalLink } from "lucide-react"
+import jsPDF from "jspdf"
 
 export default function RevisorTareaPage() {
   const { state, dispatch } = useAppContext()
@@ -41,65 +42,76 @@ export default function RevisorTareaPage() {
     }
   }
 
-  const generatePDFBlob = (document: any) => {
-    // Crear contenido HTML para PDF
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <title>${document.numero}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
-            .header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #00363B; padding-bottom: 20px; }
-            .title { font-size: 24px; font-weight: bold; color: #00363B; margin-bottom: 10px; }
-            .subtitle { font-size: 18px; color: #666; }
-            .section { margin: 30px 0; }
-            .section-title { font-size: 16px; font-weight: bold; text-transform: uppercase; color: #00363B; margin-bottom: 15px; border-left: 4px solid #00363B; padding-left: 15px; }
-            .content { color: #333; text-align: justify; }
-            .footer { margin-top: 50px; padding-top: 20px; border-top: 1px solid #ccc; text-align: center; font-size: 12px; color: #666; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="title">${document.numero}</div>
-            <div class="subtitle">${getTypeLabel(document.tipo).toUpperCase()}</div>
-          </div>
-          
-          <div class="section">
-            <div class="section-title">OBJETIVO</div>
-            <div class="content">${document.objetivo || "No especificado"}</div>
-          </div>
-          
-          <div class="section">
-            <div class="section-title">ALCANCE</div>
-            <div class="content">${document.alcance || "No especificado"}</div>
-          </div>
-          
-          <div class="section">
-            <div class="section-title">DESARROLLO</div>
-            <div class="content">${document.desarrollo || "No especificado"}</div>
-          </div>
-          
-          <div class="footer">
-            <p>Documento generado el ${new Date(document.fechaCreacion).toLocaleDateString("es-ES")}</p>
-            <p>Última actualización: ${new Date(document.fechaActualizacion).toLocaleDateString("es-ES")}</p>
-          </div>
-        </body>
-      </html>
-    `
 
-    return new Blob([htmlContent], { type: "text/html" })
-  }
-
+  // Generar PDF real usando jsPDF, soportando saltos de página y todas las secciones
   const handleViewPDF = () => {
     if (!selectedRequest) return
 
-    // Crear blob y abrir en visor nativo del browser
-    const blob = generatePDFBlob(selectedRequest)
-    const url = URL.createObjectURL(blob)
-    window.open(url, "_blank")
+    const doc = new jsPDF()
+    const margin = 15
+    const maxWidth = 180
+    const lineHeight = 7
+    const pageHeight = doc.internal.pageSize.getHeight()
+    let y = margin
+
+    // Helper para salto de página
+    const checkAddPage = (linesCount = 1) => {
+      if (y + linesCount * lineHeight > pageHeight - 20) {
+        doc.addPage()
+        y = margin
+      }
+    }
+
+    // Título principal
+    doc.setFontSize(18)
+    doc.setTextColor('#00363B')
+    doc.text(`Documento: ${selectedRequest.numero}`, margin, y)
+    y += 10
+    doc.setFontSize(14)
+    doc.setTextColor('#666666')
+    doc.text(getTypeLabel(selectedRequest.tipo).toUpperCase(), margin, y)
+    y += 15
+
+    // Sección genérica con salto de página
+    const printSection = (title: string, text: string) => {
+      doc.setFontSize(12)
+      doc.setTextColor('#00363B')
+      checkAddPage()
+      doc.text(title, margin, y)
+      y += lineHeight
+      doc.setFontSize(11)
+      doc.setTextColor('#333333')
+      const lines = doc.splitTextToSize(text || 'No especificado', maxWidth)
+      for (let i = 0; i < lines.length; i++) {
+        checkAddPage()
+        doc.text(lines[i], margin, y)
+        y += lineHeight
+      }
+      y += 5
+    }
+
+    printSection('OBJETIVO', selectedRequest.objetivo)
+    printSection('ALCANCE', selectedRequest.alcance)
+    printSection('DESARROLLO', selectedRequest.desarrollo)
+
+    // Footer (solo en la última página)
+    doc.setFontSize(10)
+    doc.setTextColor('#666666')
+    doc.text(
+      `Documento generado el ${selectedRequest.fechaCreacion ? new Date(selectedRequest.fechaCreacion).toLocaleDateString('es-ES') : ''}`,
+      margin,
+      pageHeight - 20
+    )
+    doc.text(
+      `Última actualización: ${selectedRequest.fechaActualizacion ? new Date(selectedRequest.fechaActualizacion).toLocaleDateString('es-ES') : ''}`,
+      margin,
+      pageHeight - 14
+    )
+
+    doc.save(`${selectedRequest.numero || 'documento'}.pdf`)
   }
+
+
 
   const handleReject = () => {
     if (!selectedRequest || !state.user) return
@@ -232,187 +244,194 @@ export default function RevisorTareaPage() {
       />
 
       {selectedRequest && (
-        <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
-          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center text-xl">
-                <FileText className="h-6 w-6 mr-2 text-[#00363B]" />
-                Revisión de Documento: {getTypeLabel(selectedRequest.tipo).toUpperCase()}
-              </DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-6">
-              <div className="bg-gradient-to-r from-[#00363B] to-[#004d54] text-white p-4 rounded-lg">
-                <p className="text-lg font-semibold">
-                  <span className="opacity-90">Documento:</span> {selectedRequest.numero}
-                </p>
-              </div>
-
-              <Tabs defaultValue="documento" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 h-12 bg-gray-100 rounded-lg p-1">
-                  <TabsTrigger
-                    value="documento"
-                    className="flex items-center space-x-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all"
-                  >
-                    <FileText className="h-4 w-4" />
-                    <span>Documento</span>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="validadores"
-                    className="flex items-center space-x-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all"
-                  >
-                    <Users className="h-4 w-4" />
-                    <span>Validadores</span>
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="documento" className="space-y-6 mt-6">
-                  <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-                    <div className="space-y-6">
-                      <div className="border-l-4 border-[#00363B] pl-4">
-                        <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">OBJETIVO</h4>
-                        <p className="text-gray-700 leading-relaxed">{selectedRequest.objetivo || "No especificado"}</p>
-                      </div>
-
-                      <div className="border-l-4 border-[#00363B] pl-4">
-                        <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">ALCANCE</h4>
-                        <p className="text-gray-700 leading-relaxed">{selectedRequest.alcance || "No especificado"}</p>
-                      </div>
-
-                      <div className="border-l-4 border-[#00363B] pl-4">
-                        <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">DESARROLLO</h4>
-                        <p className="text-gray-700 leading-relaxed">
-                          {selectedRequest.desarrollo || "No especificado"}
-                        </p>
-                      </div>
+        <Drawer open={!!selectedRequest} onOpenChange={resetForm}>
+          <DrawerContent className="fixed inset-0 w-screen h-screen max-w-none max-h-none rounded-none p-0 bg-white z-50 flex flex-col">
+            <div className="flex flex-col flex-1 min-h-0">
+              <DrawerHeader className="border-b border-gray-200 bg-gray-50/50 flex-shrink-0">
+                <div className="flex items-center">
+                  <DrawerTitle className="text-xl font-semibold text-gray-900">
+                    {selectedRequest && `Revisión de Documento: ${getTypeLabel(selectedRequest.tipo).toUpperCase()}`}
+                  </DrawerTitle>
+                </div>
+                {selectedRequest && (
+                  <div className="mt-3">
+                    <div className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-[#00363B] text-white">
+                      <span className="opacity-90">Documento:</span>
+                      <span className="ml-2 font-semibold">{selectedRequest.numero}</span>
                     </div>
+                  </div>
+                )}
+              </DrawerHeader>
 
-                    <div className="flex justify-end mt-6 pt-4 border-t border-gray-100">
-                      <Button
-                        variant="outline"
-                        onClick={handleViewPDF}
-                        className="flex items-center space-x-2 hover:bg-gray-50 bg-transparent"
+              {/* Scrollable content area, takes all available space above footer */}
+              <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-8">
+                <div className="flex flex-col gap-8">
+                  <Tabs defaultValue="documento" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 h-12 bg-gray-100 rounded-lg p-1">
+                      <TabsTrigger
+                        value="documento"
+                        className="flex items-center space-x-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all"
                       >
-                        <ExternalLink className="h-4 w-4" />
-                        <span>Ver en PDF</span>
-                      </Button>
-                    </div>
-                  </div>
+                        <FileText className="h-4 w-4" />
+                        <span>Documento</span>
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="validadores"
+                        className="flex items-center space-x-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all"
+                      >
+                        <Users className="h-4 w-4" />
+                        <span>Validadores</span>
+                      </TabsTrigger>
+                    </TabsList>
 
-                  <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-                    <div className="flex items-center space-x-2 mb-4">
-                      <MessageSquare className="h-5 w-5 text-[#00363B]" />
-                      <Label className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Comentarios</Label>
-                    </div>
-                    <Textarea
-                      value={comments}
-                      onChange={(e) => setComments(e.target.value)}
-                      placeholder="Agregar comentarios sobre la revisión..."
-                      rows={4}
-                      className="bg-gray-50 border-gray-200 focus:border-[#00363B] focus:ring-[#00363B]"
-                    />
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="validadores" className="space-y-6 mt-6">
-                  <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-                    <div className="space-y-6">
-                      <div className="flex items-center space-x-2">
-                        <Users className="h-5 w-5 text-[#00363B]" />
-                        <h3 className="text-lg font-semibold text-gray-800">Agregar Validador</h3>
-                      </div>
-
-                      <div className="flex-1">
-                        <Label className="text-sm font-medium text-gray-600 mb-2 block">Seleccionar Validador:</Label>
-                        <Select value="" onValueChange={handleAddValidator}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccione un validador para agregar" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {validators
-                              .filter((validator) => !selectedValidators.includes(validator.id))
-                              .map((validator) => (
-                                <SelectItem key={validator.id} value={validator.id}>
-                                  {validator.name}
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {selectedValidators.length > 0 && (
-                        <div className="space-y-4">
-                          <div>
-                            <h4 className="font-medium mb-3">Validadores Agregados:</h4>
-                            <div className="bg-white border rounded-lg">
-                              <table className="w-full">
-                                <thead className="bg-[#00363B] text-white">
-                                  <tr>
-                                    <th className="text-left py-3 px-4 text-sm font-medium">Nombre del Validador</th>
-                                    <th className="text-left py-3 px-4 text-sm font-medium">Rol</th>
-                                    <th className="text-center py-3 px-4 text-sm font-medium">Seleccionar</th>
-                                    <th className="text-center py-3 px-4 text-sm font-medium">Acciones</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {selectedValidators.map((validatorId) => {
-                                    const validator = validators.find((v) => v.id === validatorId)
-                                    return (
-                                      <tr key={validatorId} className="border-t">
-                                        <td className="py-3 px-4 font-medium">{validator?.name}</td>
-                                        <td className="py-3 px-4 text-gray-600">Validador</td>
-                                        <td className="py-3 px-4 text-center">
-                                          <Checkbox
-                                            checked={true}
-                                            onCheckedChange={(checked) =>
-                                              handleValidatorToggle(validatorId, checked as boolean)
-                                            }
-                                            className="data-[state=checked]:bg-[#00363B] data-[state=checked]:border-[#00363B]"
-                                          />
-                                        </td>
-                                        <td className="py-3 px-4 text-center">
-                                          <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => handleRemoveValidator(validatorId)}
-                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                          >
-                                            Remover
-                                          </Button>
-                                        </td>
-                                      </tr>
-                                    )
-                                  })}
-                                </tbody>
-                              </table>
-                            </div>
+                    <TabsContent value="documento" className="space-y-6 mt-6">
+                      <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                        <div className="space-y-6">
+                          <div className="border-l-4 border-[#00363B] pl-4">
+                            <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">OBJETIVO</h4>
+                            <p className="text-gray-700 leading-relaxed">{selectedRequest.objetivo || "No especificado"}</p>
+                          </div>
+                          <div className="border-l-4 border-[#00363B] pl-4">
+                            <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">ALCANCE</h4>
+                            <p className="text-gray-700 leading-relaxed">{selectedRequest.alcance || "No especificado"}</p>
+                          </div>
+                          <div className="border-l-4 border-[#00363B] pl-4">
+                            <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">DESARROLLO</h4>
+                            <p className="text-gray-700 leading-relaxed">{selectedRequest.desarrollo || "No especificado"}</p>
                           </div>
                         </div>
-                      )}
-                    </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
+                        <div className="flex justify-end mt-6 pt-4 border-t border-gray-100">
+                          <Button
+                            variant="outline"
+                            onClick={handleViewPDF}
+                            className="flex items-center space-x-2 hover:bg-gray-50 bg-transparent"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            <span>Ver en PDF</span>
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                        <div className="flex items-center space-x-2 mb-4">
+                          <MessageSquare className="h-5 w-5 text-[#00363B]" />
+                          <Label className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Comentarios</Label>
+                        </div>
+                        <Textarea
+                          value={comments}
+                          onChange={(e) => setComments(e.target.value)}
+                          placeholder="Agregar comentarios sobre la revisión..."
+                          rows={4}
+                          className="bg-gray-50 border-gray-200 focus:border-[#00363B] focus:ring-[#00363B]"
+                        />
+                      </div>
+                    </TabsContent>
 
-              <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                <Button variant="outline" onClick={resetForm} className="px-6 bg-transparent">
-                  Cancelar
-                </Button>
-                <div className="flex space-x-3">
-                  <Button onClick={handleReject} variant="destructive" className="px-6">
-                    Rechazar
-                  </Button>
-                  <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700 px-6">
-                    Guardar
-                  </Button>
-                  <Button onClick={handleApprove} className="bg-[#00363B] hover:bg-[#00363B]/90 px-6">
-                    Aprobar
-                  </Button>
+                    <TabsContent value="validadores" className="space-y-6 mt-6">
+                      <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                        <div className="space-y-6">
+                          <div className="flex items-center space-x-2">
+                            <Users className="h-5 w-5 text-[#00363B]" />
+                            <h3 className="text-lg font-semibold text-gray-800">Agregar Validador</h3>
+                          </div>
+                          <div className="flex-1">
+                            <Label className="text-sm font-medium text-gray-600 mb-2 block">Seleccionar Validador:</Label>
+                            <Select value="" onValueChange={handleAddValidator}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccione un validador para agregar" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {validators
+                                  .filter((validator) => !selectedValidators.includes(validator.id))
+                                  .map((validator) => (
+                                    <SelectItem key={validator.id} value={validator.id}>
+                                      {validator.name}
+                                    </SelectItem>
+                                  ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          {selectedValidators.length > 0 && (
+                            <div className="space-y-4">
+                              <div>
+                                <h4 className="font-medium mb-3">Validadores Agregados:</h4>
+                                <div className="bg-white border rounded-lg">
+                                  <table className="w-full">
+                                    <thead className="bg-[#00363B] text-white">
+                                      <tr>
+                                        <th className="text-left py-3 px-4 text-sm font-medium">Nombre del Validador</th>
+                                        <th className="text-left py-3 px-4 text-sm font-medium">Rol</th>
+                                        <th className="text-center py-3 px-4 text-sm font-medium">Seleccionar</th>
+                                        <th className="text-center py-3 px-4 text-sm font-medium">Acciones</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {selectedValidators.map((validatorId) => {
+                                        const validator = validators.find((v) => v.id === validatorId)
+                                        return (
+                                          <tr key={validatorId} className="border-t">
+                                            <td className="py-3 px-4 font-medium">{validator?.name}</td>
+                                            <td className="py-3 px-4 text-gray-600">Validador</td>
+                                            <td className="py-3 px-4 text-center">
+                                              <Checkbox
+                                                checked={true}
+                                                onCheckedChange={(checked) =>
+                                                  handleValidatorToggle(validatorId, checked as boolean)
+                                                }
+                                                className="data-[state=checked]:bg-[#00363B] data-[state=checked]:border-[#00363B]"
+                                              />
+                                            </td>
+                                            <td className="py-3 px-4 text-center">
+                                              <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => handleRemoveValidator(validatorId)}
+                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                              >
+                                                Remover
+                                              </Button>
+                                            </td>
+                                          </tr>
+                                        )
+                                      })}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </div>
+                {/* Invisible spacer for mobile keyboard, allows scrolling to bottom */}
+                <div className="h-8 sm:h-0 pointer-events-none select-none" aria-hidden="true"></div>
+              </div>
+
+              {/* Footer con botones sticky */}
+              <div className="border-t border-gray-200 bg-gray-50/50 px-4 py-3 sticky bottom-0 left-0 right-0 z-20">
+                <div className="flex justify-between items-center">
+                  <DrawerClose asChild>
+                    <Button variant="outline" className="px-6 border-gray-300 text-gray-700 hover:bg-gray-50">
+                      Cancelar
+                    </Button>
+                  </DrawerClose>
+                  <div className="flex space-x-3">
+                    <Button onClick={handleReject} variant="destructive" className="px-6">
+                      Rechazar
+                    </Button>
+                    <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700 px-6 text-white">
+                      Guardar
+                    </Button>
+                    <Button onClick={handleApprove} className="bg-[#00363B] hover:bg-[#00363B]/90 px-6 text-white">
+                      Aprobar
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
+          </DrawerContent>
+        </Drawer>
       )}
     </div>
   )

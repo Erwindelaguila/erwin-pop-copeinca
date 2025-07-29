@@ -163,6 +163,60 @@ export default function RevisorPage() {
   const isTypeRequest = selectedRequest?.status === "en_revision"
   const isDocumentRequest = selectedRequest?.status === "documento_enviado"
 
+  // Aprobar directo desde la tabla (sin modal)
+  const handleAcceptDocumentDirect = (request: any) => {
+    if (!request || !state.user) return;
+    dispatch({
+      type: "UPDATE_REQUEST",
+      payload: {
+        id: request.id,
+        updates: {
+          status: "en_validacion",
+        },
+      },
+    });
+    dispatch({
+      type: "ADD_HISTORY",
+      payload: {
+        requestId: request.id,
+        entry: {
+          accion: "enviado_revision",
+          usuario: state.user.name,
+          fecha: new Date().toISOString(),
+          detalles: "Documento aceptado para revisión detallada",
+        },
+      },
+    });
+    toast.success("Documento aceptado", { description: "El documento ha sido enviado a sus tareas para revisión" });
+  };
+
+  // Rechazar directo desde la tabla (sin modal)
+  const handleRejectDirect = (request: any) => {
+    if (!request || !state.user) return;
+    dispatch({
+      type: "UPDATE_REQUEST",
+      payload: {
+        id: request.id,
+        updates: {
+          status: "rechazado",
+        },
+      },
+    });
+    dispatch({
+      type: "ADD_HISTORY",
+      payload: {
+        requestId: request.id,
+        entry: {
+          accion: "rechazado",
+          usuario: state.user.name,
+          fecha: new Date().toISOString(),
+          detalles: "Rechazado por el revisor",
+        },
+      },
+    });
+    toast.error("La solicitud ha sido rechazada", { description: "Rechazado" });
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold text-gray-900">Solicitudes</h1>
@@ -176,9 +230,27 @@ export default function RevisorPage() {
 
       <RequestsTable
         data={displayedRequests}
-        onReview={activeTab === "pendiente" ? handleReviewRequest : undefined}
         showActions={true}
         isHistorial={activeTab === "historial"}
+        // Solo para en_revision, onReview activa el modal de Validar Tipo
+        onReview={(request: any) => {
+          if (request.status === "en_revision") handleReviewRequest(request)
+        }}
+        // Solo para documento_enviado, mostrar Aprobar/Rechazar directo
+        customActions={(request: any) =>
+          request.status === "documento_enviado"
+            ? (
+                <div className="flex gap-2">
+                  <Button size="sm" className="bg-[#00363B] hover:bg-[#00363B]/90 text-white" onClick={() => handleAcceptDocumentDirect(request)}>
+                    Aprobar
+                  </Button>
+                  <Button size="sm" variant="destructive" onClick={() => handleRejectDirect(request)}>
+                    Rechazar
+                  </Button>
+                </div>
+              )
+            : undefined
+        }
       />
 
       {selectedRequest && (
@@ -186,7 +258,7 @@ export default function RevisorPage() {
           <DialogContent className="max-w-lg">
             <DialogHeader className="pb-4">
               <DialogTitle className="text-xl font-semibold">
-                {isTypeRequest ? "Validar Tipo de Documento" : "Revisión de Documento"}
+                {isTypeRequest ? "Validar Tipo de Documento" : "Vista Previa del Documento"}
               </DialogTitle>
             </DialogHeader>
             {isTypeRequest && (
@@ -250,11 +322,9 @@ export default function RevisorPage() {
                       {selectedType !== selectedRequest.tipo ? "Cambiar y Aprobar" : "Aprobar"}
                     </Button>
                   ) : (
-                    <>
-                      <Button onClick={handleAcceptDocument} className="bg-[#00363B] hover:bg-[#00363B]/90 px-6">
-                        Aceptar
-                      </Button>
-                    </>
+                    <Button onClick={handleAcceptDocument} className="bg-[#00363B] hover:bg-[#00363B]/90 px-6">
+                      Aprobar
+                    </Button>
                   )}
                 </div>
               </div>

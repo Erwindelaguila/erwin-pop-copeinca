@@ -14,11 +14,12 @@ interface RequestsTableProps {
   onReview?: (request: DocumentRequest) => void
   showActions?: boolean
   isHistorial?: boolean
+  customActions?: (request: DocumentRequest) => React.ReactNode
 }
 
 const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50]
 
-export function RequestsTable({ data, onReview, showActions = true, isHistorial = false }: RequestsTableProps) {
+export function RequestsTable({ data, onReview, showActions = true, isHistorial = false, customActions }: RequestsTableProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState("")
   const [itemsPerPage, setItemsPerPage] = useState(10)
@@ -57,6 +58,14 @@ export function RequestsTable({ data, onReview, showActions = true, isHistorial 
   }
 
   const getButtonText = (item: DocumentRequest) => {
+    // Si el documento está en pendiente y viene de validación, mostrar 'Aprobar'
+    if (item.status === "pendiente" && Array.isArray(item.historial) && item.historial.some((h: any) => h.accion === "validacion_aprobada")) {
+      return "Aprobar"
+    }
+    // Si está en validación y tiene validadores, mostrar Aprobar
+    if (item.status === "en_validacion" && item.validadores?.length) {
+      return "Aprobar"
+    }
     switch (item.status) {
       case "en_revision":
         return "Validar Tipo"
@@ -65,15 +74,21 @@ export function RequestsTable({ data, onReview, showActions = true, isHistorial 
       case "en_desarrollo":
         return "Crear Documento"
       case "en_validacion":
-        if (item.validadores?.length) {
-          return "Validar Documento"
-        }
         return "Revisar Documento"
       case "validacion_completada":
         return "Aprobar Final"
       case "pendiente":
-        if (item.objetivo) {
-          return "Vista Previa"
+        // Si viene de validación, mostrar Aprobar
+        if (Array.isArray(item.historial) && item.historial.some((h: any) => h.accion === "validacion_aprobada")) {
+          return "Aprobar"
+        }
+        // Si viene de cambio de tipo, mostrar Aprobar
+        if (item.tipoOriginal) {
+          return "Aprobar"
+        }
+        // Si viene de aprobado, mostrar Aprobar
+        if (Array.isArray(item.historial) && item.historial.some((h: any) => h.accion === "aprobado")) {
+          return "Aprobar"
         }
         return "Revisar"
       default:
@@ -129,11 +144,13 @@ export function RequestsTable({ data, onReview, showActions = true, isHistorial 
                   </td>
                   {showActions && !isHistorial && (
                     <td className="py-4 px-6">
-                      {onReview && (
-                        <Button size="sm" onClick={() => onReview(item)} className="bg-[#00363B] hover:bg-[#00363B]/90">
-                          {getButtonText(item)}
-                        </Button>
-                      )}
+                      {customActions && customActions(item) !== undefined && customActions(item) !== null
+                        ? customActions(item)
+                        : onReview && (
+                            <Button size="sm" onClick={() => onReview(item)} className="bg-[#00363B] hover:bg-[#00363B]/90">
+                              {getButtonText(item)}
+                            </Button>
+                          )}
                     </td>
                   )}
                 </tr>

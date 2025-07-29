@@ -45,14 +45,14 @@ export default function ValidadorPage() {
     setSelectedRequest(request)
   }
 
-  const handleAccept = () => {
-    if (!selectedRequest || !state.user) return
+  const handleAccept = (request: any) => {
+    if (!request || !state.user) return
 
     // Mover a tareas del validador
     dispatch({
       type: "UPDATE_REQUEST",
       payload: {
-        id: selectedRequest.id,
+        id: request.id,
         updates: {
           status: "en_validacion", // Ahora va a tareas
         },
@@ -62,7 +62,7 @@ export default function ValidadorPage() {
     dispatch({
       type: "ADD_HISTORY",
       payload: {
-        requestId: selectedRequest.id,
+        requestId: request.id,
         entry: {
           accion: "enviado_revision",
           usuario: state.user.name,
@@ -73,17 +73,15 @@ export default function ValidadorPage() {
     })
 
     toast("El documento ha sido aceptado y enviado a tareas")
-
-    setSelectedRequest(null)
   }
 
-  const handleReject = () => {
-    if (!selectedRequest || !state.user) return
+  const handleReject = (request: any) => {
+    if (!request || !state.user) return
 
     dispatch({
       type: "UPDATE_REQUEST",
       payload: {
-        id: selectedRequest.id,
+        id: request.id,
         updates: {
           status: "rechazado",
         },
@@ -93,7 +91,7 @@ export default function ValidadorPage() {
     dispatch({
       type: "ADD_HISTORY",
       payload: {
-        requestId: selectedRequest.id,
+        requestId: request.id,
         entry: {
           accion: "rechazado",
           usuario: state.user.name,
@@ -104,8 +102,6 @@ export default function ValidadorPage() {
     })
 
     toast("El documento ha sido rechazado")
-
-    setSelectedRequest(null)
   }
 
   return (
@@ -119,66 +115,27 @@ export default function ValidadorPage() {
         pendienteCount={pendienteRequests.length}
       />
 
+
       <RequestsTable
         data={displayedRequests}
-        onReview={activeTab === "pendiente" ? handleAcceptForValidation : undefined}
         showActions={true}
         isHistorial={activeTab === "historial"}
-      />
-
-      {selectedRequest && (
-        <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Vista Previa - {getTypeLabel(selectedRequest.tipo).toUpperCase()}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-6">
-              <div className="bg-gray-50 p-3 rounded">
-                <p>
-                  <span className="font-medium">Documento:</span> {selectedRequest.numero}
-                </p>
-              </div>
-
-              {/* Vista previa del documento */}
-              <div className="border rounded-lg p-4 space-y-4">
-                <div className="border-l-4 border-[#00363B] pl-4">
-                  <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-2">OBJETIVO</h4>
-                  <p className="text-gray-700">{selectedRequest.objetivo || "No especificado"}</p>
-                </div>
-                <div className="border-l-4 border-[#00363B] pl-4">
-                  <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-2">ALCANCE</h4>
-                  <p className="text-gray-700">{selectedRequest.alcance || "No especificado"}</p>
-                </div>
-                <div className="border-l-4 border-[#00363B] pl-4">
-                  <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-2">DESARROLLO</h4>
-                  <p className="text-gray-700">{selectedRequest.desarrollo || "No especificado"}</p>
-                </div>
-              </div>
-
-              {selectedRequest.comentariosRevisor && (
-                <div className="border rounded-lg p-4">
-                  <h4 className="font-medium text-gray-600 mb-2">Comentarios del Revisor</h4>
-                  <p className="text-gray-800">{selectedRequest.comentariosRevisor}</p>
-                </div>
-              )}
-
-              <div className="flex justify-between space-x-2">
-                <Button variant="outline" onClick={() => setSelectedRequest(null)}>
-                  Cancelar
-                </Button>
-                <div className="flex space-x-2">
-                  <Button onClick={handleReject} variant="destructive">
+        customActions={
+          activeTab === "pendiente"
+            ? (request) => (
+                <div className="flex gap-2">
+                  <Button size="sm" className="bg-[#00363B] hover:bg-[#00363B]/90" onClick={() => handleAccept(request)}>
+                    Aprobar
+                  </Button>
+                  <Button size="sm" variant="destructive" onClick={() => handleReject(request)}>
                     Rechazar
                   </Button>
-                  <Button onClick={handleAccept} className="bg-[#00363B] hover:bg-[#00363B]/90">
-                    Aceptar para Validación
-                  </Button>
                 </div>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+              )
+            : undefined
+        }
+      />
+
     </div>
   )
 }
