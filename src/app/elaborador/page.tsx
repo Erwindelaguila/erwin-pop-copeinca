@@ -7,18 +7,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import { toast } from "sonner"
 import { useAppContext, getTypeLabel } from "../../lib/store"
-import type { DocumentType } from "../../lib/types"
+import type { DocumentType, DocumentRequest, HistoryEntry } from "../../lib/types"
 import { RequestsTable } from "../../components/requests-table"
 import { StatusTabs } from "../../components/status-tabs"
 import { CheckCircle, XCircle, ArrowRight, Eye } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 // Declare the isTypeValidationFlow function
-const isTypeValidationFlow = (request: any) => {
+const isTypeValidationFlow = (request: DocumentRequest) => {
   return (
     request.tipoOriginal &&
     !request.historial.some(
-      (h: any) => h.usuario === request.elaboradorName && (h.accion === "tarea_creada" || h.accion === "rechazado"),
+      (h: HistoryEntry) => h.usuario === request.elaboradorName && (h.accion === "tarea_creada" || h.accion === "rechazado"),
     )
   )
 }
@@ -26,7 +26,7 @@ const isTypeValidationFlow = (request: any) => {
 export default function ElaboradorPage() {
   const { state, dispatch } = useAppContext()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
-  const [selectedRequest, setSelectedRequest] = useState<any>(null)
+  const [selectedRequest, setSelectedRequest] = useState<DocumentRequest | null>(null)
   const [selectedType, setSelectedType] = useState<DocumentType | "">("")
   const [activeTab, setActiveTab] = useState<"historial" | "pendiente">("historial")
 
@@ -41,7 +41,7 @@ export default function ElaboradorPage() {
     if (req.tipoOriginal) return true
 
     // Si viene del revisor SIN validadores
-    const hasRevisorApproval = req.historial.some((h: { accion: string }) => h.accion === "aprobado")
+    const hasRevisorApproval = req.historial.some((h: HistoryEntry) => h.accion === "aprobado")
     const hasValidators = req.validadores && req.validadores.length > 0
 
     if (hasRevisorApproval && !hasValidators) {
@@ -49,7 +49,7 @@ export default function ElaboradorPage() {
     }
 
     // Si viene del validador (después de validación completada)
-    const hasValidation = req.historial.some((h: { accion: string }) => h.accion === "validacion_aprobada")
+    const hasValidation = req.historial.some((h: HistoryEntry) => h.accion === "validacion_aprobada")
     if (hasValidation) {
       return true
     }
@@ -149,7 +149,7 @@ export default function ElaboradorPage() {
   }
 
   // Acciones directas para aprobar/rechazar desde la tabla (SOLO FLUJO 2)
-  const handleAcceptChangeDirect = (request: any) => {
+  const handleAcceptChangeDirect = (request: DocumentRequest) => {
     if (!request || !state.user) return
 
     dispatch({
@@ -178,7 +178,7 @@ export default function ElaboradorPage() {
     toast.success("Documento aceptado y enviado al aprobador")
   }
 
-  const handleRejectChangeDirect = (request: any) => {
+  const handleRejectChangeDirect = (request: DocumentRequest) => {
     if (!request || !state.user) return
 
     dispatch({
@@ -207,17 +207,15 @@ export default function ElaboradorPage() {
     toast.error("Documento rechazado")
   }
 
-  // Agregar esta función antes del return
-  const handleVisualizarPrevia = (request: any) => {
+  const handleVisualizarPrevia = (request: DocumentRequest) => {
     router.push(`/elaborador/previa/${request.id}`)
   }
 
-  // Actualizar la función isDocumentApprovedFlow para incluir el botón de visualizar previa
-  const isDocumentApprovedFlow = (request: any) => {
+  const isDocumentApprovedFlow = (request: DocumentRequest) => {
     // Si tiene tipoOriginal Y ya fue procesado → botones directos
     if (request.tipoOriginal) {
       const hasElaboradorResponse = request.historial.some(
-        (h: any) => h.usuario === state.user?.name && (h.accion === "tarea_creada" || h.accion === "rechazado"),
+        (h: HistoryEntry) => h.usuario === state.user?.name && (h.accion === "tarea_creada" || h.accion === "rechazado"),
       )
       if (hasElaboradorResponse) {
         return true
@@ -225,14 +223,14 @@ export default function ElaboradorPage() {
     }
 
     // Viene del validador → SIEMPRE botones directos
-    const hasValidation = request.historial.some((h: any) => h.accion === "validacion_aprobada")
+    const hasValidation = request.historial.some((h: HistoryEntry) => h.accion === "validacion_aprobada")
     if (hasValidation) {
       return true
     }
 
     // Viene del revisor DESPUÉS de documento_enviado → SIEMPRE botones directos (con o sin comentarios)
-    const hasRevisorApproval = request.historial.some((h: any) => h.accion === "aprobado")
-    const hasDocumentSent = request.historial.some((h: any) => h.accion === "documento_enviado")
+    const hasRevisorApproval = request.historial.some((h: HistoryEntry) => h.accion === "aprobado")
+    const hasDocumentSent = request.historial.some((h: HistoryEntry) => h.accion === "documento_enviado")
     if (hasRevisorApproval && hasDocumentSent) {
       return true
     }
@@ -245,13 +243,12 @@ export default function ElaboradorPage() {
     return false
   }
 
-  // Agregar función para determinar si debe mostrar "Visualizar Previa"
-  const shouldShowVisualizarPrevia = (request: any) => {
+  const shouldShowVisualizarPrevia = (request: DocumentRequest) => {
     // Si viene del revisor con comentarios o después de validación
     const hasRevisorComments = request.comentariosRevisor
-    const hasValidation = request.historial.some((h: any) => h.accion === "validacion_aprobada")
-    const hasRevisorApproval = request.historial.some((h: any) => h.accion === "aprobado")
-    const hasDocumentSent = request.historial.some((h: any) => h.accion === "documento_enviado")
+    const hasValidation = request.historial.some((h: HistoryEntry) => h.accion === "validacion_aprobada")
+    const hasRevisorApproval = request.historial.some((h: HistoryEntry) => h.accion === "aprobado")
+    const hasDocumentSent = request.historial.some((h: HistoryEntry) => h.accion === "documento_enviado")
 
     // Si fue liberado de tarea → SIEMPRE vista previa
     if (request.liberadoDeTarea) {
@@ -286,7 +283,6 @@ export default function ElaboradorPage() {
                     <SelectItem value="procedimiento">Procedimiento</SelectItem>
                     <SelectItem value="instructivo">Instructivo</SelectItem>
                     <SelectItem value="manual">Manual</SelectItem>
-                    <SelectItem value="politica">Política</SelectItem>
                     <SelectItem value="formato">Formato</SelectItem>
                     <SelectItem value="norma">Norma</SelectItem>
                   </SelectContent>
@@ -359,7 +355,7 @@ export default function ElaboradorPage() {
                           className="bg-[#00363B] hover:bg-[#00363B]/90"
                           onClick={() => handleAcceptChangeDirect(request)}
                         >
-                          Aprobar
+                          Aceptar
                         </Button>
                         <Button size="sm" variant="destructive" onClick={() => handleRejectChangeDirect(request)}>
                           Rechazar
@@ -427,7 +423,7 @@ export default function ElaboradorPage() {
                   </Button>
                   <Button onClick={handleAcceptChange} className="bg-[#00363B] hover:bg-[#00363B]/90 px-6">
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    Aprobar
+                    Aceptar
                   </Button>
                 </div>
               </div>

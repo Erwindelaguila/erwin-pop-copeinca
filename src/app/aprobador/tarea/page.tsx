@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import type { DocumentRequest, HistoryEntry } from "../../../lib/types"
 import { Button } from "../../../components/ui/button"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "../../../components/ui/drawer"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs"
@@ -14,7 +15,7 @@ import jsPDF from "jspdf"
 
 export default function AprobadorTareaPage() {
   const { state, dispatch } = useAppContext()
-  const [selectedRequest, setSelectedRequest] = useState<any>(null)
+  const [selectedRequest, setSelectedRequest] = useState<DocumentRequest | null>(null)
   const [comments, setComments] = useState("")
 
   const pendingTasks = state.requests.filter((req) => req.status === "en_aprobacion")
@@ -64,9 +65,9 @@ export default function AprobadorTareaPage() {
       y += 5
     }
 
-    printSection("OBJETIVO", selectedRequest.objetivo)
-    printSection("ALCANCE", selectedRequest.alcance)
-    printSection("DESARROLLO", selectedRequest.desarrollo)
+    printSection("OBJETIVO", selectedRequest.objetivo || "")
+    printSection("ALCANCE", selectedRequest.alcance || "")
+    printSection("DESARROLLO", selectedRequest.desarrollo || "")
 
     doc.setFontSize(10)
     doc.setTextColor("#666666")
@@ -200,7 +201,7 @@ export default function AprobadorTareaPage() {
     setComments("")
   }
 
-  const getComments = (request: any) => {
+  const getComments = (request: DocumentRequest) => {
     const comments = []
 
     if (request.comentariosRevisor) {
@@ -213,8 +214,8 @@ export default function AprobadorTareaPage() {
     }
 
     if (request.historial) {
-      const validationEntries = request.historial.filter((h: any) => h.accion === "validacion_aprobada" && h.detalles)
-      validationEntries.forEach((entry: any) => {
+      const validationEntries = request.historial.filter((h: HistoryEntry) => h.accion === "validacion_aprobada" && h.detalles)
+      validationEntries.forEach((entry: HistoryEntry) => {
         comments.push({
           type: "validador",
           author: entry.usuario,

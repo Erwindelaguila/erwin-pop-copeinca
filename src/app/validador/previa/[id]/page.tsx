@@ -1,4 +1,6 @@
+
 "use client"
+import type { DocumentRequest } from "../../../../lib/types"
 
 import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
@@ -13,12 +15,12 @@ export default function ValidadorPreviaPage() {
   const router = useRouter()
   const params = useParams()
   const { state, dispatch } = useAppContext()
-  const [document, setDocument] = useState<any>(null)
+  const [document, setDocument] = useState<DocumentRequest | null>(null)
 
   useEffect(() => {
     if (params.id) {
-      const foundDoc = state.requests.find((req) => req.id === params.id)
-      setDocument(foundDoc)
+      const foundDoc = state.requests.find((req: DocumentRequest) => req.id === params.id)
+      setDocument(foundDoc || null)
     }
   }, [params.id, state.requests])
 
@@ -203,7 +205,7 @@ export default function ValidadorPreviaPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {document.historial.map((entry: any, index: number) => (
+                {document.historial.map((entry: { id: string; usuario: string; fecha: string; accion: string; detalles?: string }) => (
                   <div
                     key={entry.id}
                     className="flex items-start space-x-3 pb-3 border-b border-gray-100 last:border-b-0"

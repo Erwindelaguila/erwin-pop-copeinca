@@ -1,30 +1,40 @@
-"use client"
 
+
+
+"use client"
+import { Save, Send, MessageSquare, User, Clock } from "lucide-react"
 import { useState } from "react"
+import type { DocumentRequest } from "../../../lib/types"
+import type { HistoryEntry } from "../../../lib/types"
 import { Button } from "../../../components/ui/button"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "../../../components/ui/drawer"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs"
 import { Label } from "../../../components/ui/label"
 import { Textarea } from "../../../components/ui/textarea"
 import { toast } from "sonner"
 import { useAppContext, getTypeLabel } from "../../../lib/store"
 import { RequestsTable } from "../../../components/requests-table"
-import { Save, Send, FileText, MessageSquare, User, Clock } from "lucide-react"
 
 export default function ElaboradorTareaPage() {
+
   const { state, dispatch } = useAppContext()
-  const [selectedRequest, setSelectedRequest] = useState<any>(null)
-  const [formData, setFormData] = useState({
+  const [selectedRequest, setSelectedRequest] = useState<DocumentRequest | null>(null)
+  const [formData, setFormData] = useState<{
+    objetivo: string
+    alcance: string
+    desarrollo: string
+  }>({
     objetivo: "",
     alcance: "",
     desarrollo: "",
   })
 
+
+
   const pendingTasks = state.requests.filter(
     (req) => req.elaboradorId === state.user?.id && req.status === "en_desarrollo",
   )
 
-  const handleCreateDocument = (request: any) => {
+  const handleCreateDocument = (request: DocumentRequest) => {
     setSelectedRequest(request)
     setFormData({
       objetivo: request.objetivo || "",
@@ -175,11 +185,11 @@ export default function ElaboradorTareaPage() {
   }
 
   // Determinar si es revisión o creación
-  const isRevision = (request: any) => {
+  const isRevision = (request: DocumentRequest | null) => {
     if (!request || !request.historial) return false
 
     // CREAR DOCUMENTO: Cuando el elaborador nunca ha enviado un documento
-    const hasDocumentSent = request.historial.some((h: any) => h.accion === "documento_enviado")
+    const hasDocumentSent = request.historial.some((h: HistoryEntry) => h.accion === "documento_enviado")
 
     // Si el elaborador NUNCA ha enviado un documento = CREAR
     if (!hasDocumentSent) {
@@ -188,19 +198,19 @@ export default function ElaboradorTareaPage() {
 
     // REVISAR DOCUMENTO: Cuando el elaborador ya envió un documento y se lo devolvieron
     // - Si viene del validador (después de haber enviado)
-    const hasValidation = request.historial.some((h: any) => h.accion === "validacion_aprobada")
+    const hasValidation = request.historial.some((h: HistoryEntry) => h.accion === "validacion_aprobada")
     if (hasValidation && hasDocumentSent) {
       return true
     }
 
     // - Si fue rechazado (después de haber enviado)
-    const wasRejected = request.historial.some((h: any) => h.accion === "rechazado")
+    const wasRejected = request.historial.some((h: HistoryEntry) => h.accion === "rechazado")
     if (wasRejected && hasDocumentSent) {
       return true
     }
 
     // - Si viene del revisor después de documento_enviado (flujo 2)
-    const hasRevisorApproval = request.historial.some((h: any) => h.accion === "aprobado")
+    const hasRevisorApproval = request.historial.some((h: HistoryEntry) => h.accion === "aprobado")
     if (hasRevisorApproval && hasDocumentSent) {
       return true
     }
@@ -209,7 +219,7 @@ export default function ElaboradorTareaPage() {
   }
 
   // Determinar si los campos deben estar bloqueados (solo lectura)
-  const isReadOnly = (request: any) => {
+  const isReadOnly = (request: DocumentRequest | null) => {
     if (!request) return false
 
     // Si es revisión (viene del revisor/validador), bloquear campos
@@ -217,7 +227,7 @@ export default function ElaboradorTareaPage() {
   }
 
   // Obtener comentarios del revisor y validador
-  const getComments = (request: any) => {
+  const getComments = (request: DocumentRequest | null) => {
     if (!request) return []
     const comments = []
 
@@ -233,7 +243,7 @@ export default function ElaboradorTareaPage() {
 
     // Comentarios del validador (buscar en historial)
     if (request.historial) {
-      const validationEntry = request.historial.find((h: any) => h.accion === "validacion_aprobada")
+      const validationEntry = request.historial.find((h: HistoryEntry) => h.accion === "validacion_aprobada")
       if (validationEntry && validationEntry.detalles) {
         comments.push({
           type: "validador",
@@ -437,5 +447,5 @@ export default function ElaboradorTareaPage() {
         </DrawerContent>
       </Drawer>
     </div>
-  )
+  );
 }

@@ -1,5 +1,6 @@
 "use client"
-
+import jsPDF from "jspdf"
+import type { DocumentRequest } from "../../../lib/types"
 import { useState } from "react"
 import { Button } from "../../../components/ui/button"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "../../../components/ui/drawer"
@@ -13,7 +14,7 @@ import { FileText, MessageSquare, ExternalLink } from "lucide-react"
 
 export default function ValidadorTareaPage() {
   const { state, dispatch } = useAppContext()
-  const [selectedRequest, setSelectedRequest] = useState<any>(null)
+  const [selectedRequest, setSelectedRequest] = useState<DocumentRequest | null>(null)
   const [comments, setComments] = useState("")
 
 
@@ -29,7 +30,6 @@ export default function ValidadorTareaPage() {
     if (!selectedRequest) return
 
 
-    const jsPDF = (window as any).jsPDF || require("jspdf").default
     const doc = new jsPDF()
     const margin = 15
     const maxWidth = 180
@@ -72,9 +72,9 @@ export default function ValidadorTareaPage() {
       y += 5
     }
 
-    printSection("OBJETIVO", selectedRequest.objetivo)
-    printSection("ALCANCE", selectedRequest.alcance)
-    printSection("DESARROLLO", selectedRequest.desarrollo)
+    printSection("OBJETIVO", selectedRequest.objetivo || "")
+    printSection("ALCANCE", selectedRequest.alcance || "")
+    printSection("DESARROLLO", selectedRequest.desarrollo || "")
 
     doc.setFontSize(10)
     doc.setTextColor("#666666")

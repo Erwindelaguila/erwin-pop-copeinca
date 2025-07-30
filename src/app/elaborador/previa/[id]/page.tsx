@@ -7,18 +7,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../../../components
 import { Badge } from "../../../../components/ui/badge"
 import { ArrowLeft, FileText, Calendar, User, Eye } from "lucide-react"
 import { toast } from "sonner"
+import type { DocumentRequest } from "../../../../lib/types"
 import { useAppContext, getTypeLabel, getStatusLabel, getActionLabel } from "../../../../lib/store"
 
 export default function ElaboradorPreviaPage() {
   const router = useRouter()
   const params = useParams()
   const { state, dispatch } = useAppContext()
-  const [document, setDocument] = useState<any>(null)
+  const [document, setDocument] = useState<DocumentRequest | null>(null)
 
   useEffect(() => {
     if (params.id) {
-      const foundDoc = state.requests.find((req) => req.id === params.id)
-      setDocument(foundDoc)
+      const foundDoc = state.requests.find((req: DocumentRequest) => req.id === params.id)
+      setDocument(foundDoc || null)
+      setDocument(foundDoc || null)
     }
   }, [params.id, state.requests])
 
@@ -233,7 +235,7 @@ export default function ElaboradorPreviaPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {document.historial.map((entry: any, index: number) => (
+                {document.historial.map((entry) => (
                   <div
                     key={entry.id}
                     className="flex items-start space-x-3 pb-3 border-b border-gray-100 last:border-b-0"

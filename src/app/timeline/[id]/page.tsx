@@ -1,4 +1,5 @@
 "use client"
+import type { DocumentRequest } from "../../../lib/types"
 
 import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
@@ -14,12 +15,12 @@ export default function TimelinePage() {
   const router = useRouter()
   const params = useParams()
   const { state } = useAppContext()
-  const [document, setDocument] = useState<any>(null)
+  const [document, setDocument] = useState<DocumentRequest | null>(null)
 
   useEffect(() => {
     if (params.id) {
-      const foundDoc = state.requests.find((req) => req.id === params.id)
-      setDocument(foundDoc)
+      const foundDoc = state.requests.find((req: DocumentRequest) => req.id === params.id)
+      setDocument(foundDoc || null)
     }
   }, [params.id, state.requests])
 
@@ -97,54 +98,45 @@ export default function TimelinePage() {
     }
 
   
-    let currentStage = "elaboracion"
+    // let currentStage = "elaboracion" // removed unused variable
 
 
     const hasRevisionActions = historial.some(
-      (h: any) => h.accion === "aprobado" || h.accion === "cambio_tipo" || h.accion === "enviado_revision",
+      (h: { accion: string }) => h.accion === "aprobado" || h.accion === "cambio_tipo" || h.accion === "enviado_revision",
     )
     if (hasRevisionActions || status !== "en_revision") {
       stageStates.revision = "completed"
-      currentStage = "desarrollo"
     } else if (status === "en_revision") {
       stageStates.revision = "current"
-      currentStage = "revision"
     }
 
-    const hasDocumentSent = historial.some((h: any) => h.accion === "documento_enviado")
+    const hasDocumentSent = historial.some((h: { accion: string }) => h.accion === "documento_enviado")
     const isInDevelopment = status === "en_desarrollo"
     if (hasDocumentSent) {
       stageStates.desarrollo = "completed"
-      currentStage = "validacion"
     } else if (isInDevelopment) {
       stageStates.desarrollo = "current"
-      currentStage = "desarrollo"
     }
 
     const hasValidation = historial.some(
-      (h: any) => h.accion === "validacion_aprobada" || h.accion === "enviado_validacion",
+      (h: { accion: string }) => h.accion === "validacion_aprobada" || h.accion === "enviado_validacion",
     )
     const isInValidation = status === "en_validacion" || (status === "pendiente" && document.validadores)
     if (hasValidation || status === "enviado_aprobacion") {
       stageStates.validacion = "completed"
-      currentStage = "aprobacion"
     } else if (isInValidation) {
       stageStates.validacion = "current"
-      currentStage = "validacion"
     }
 
     const hasAprobadorApproval = historial.some(
-      (h: any) => h.accion === "aprobado" && h.usuario === PROFESSIONAL_USERS.aprobador.name,
+      (h: { accion: string; usuario?: string }) => h.accion === "aprobado" && h.usuario === PROFESSIONAL_USERS.aprobador.name,
     )
     if (status === "enviado_aprobacion") {
       stageStates.aprobacion = "current"
-      currentStage = "aprobacion"
     } else if (status === "aprobado" || hasAprobadorApproval) {
       stageStates.aprobacion = "completed"
-      currentStage = "completed"
     } else if (status === "rechazado") {
       stageStates.aprobacion = "rejected"
-      currentStage = "rejected"
     }
 
     const hasValidators = document.validadores && document.validadores.length > 0
@@ -161,12 +153,12 @@ export default function TimelinePage() {
       }
     }
 
-    return { stages: filteredStages, states: stageStates, currentStage }
+    return { stages: filteredStages, states: stageStates }
   }
 
-  const { stages, states, currentStage } = getTimelineStages()
+  const { stages, states } = getTimelineStages()
 
-  const getStageIcon = (stage: string, IconComponent: any) => {
+  const getStageIcon = (stage: string, IconComponent: React.ElementType) => {
     const iconProps = { className: "h-5 w-5" }
     switch (stage) {
       case "completed":
@@ -204,20 +196,24 @@ export default function TimelinePage() {
     switch (stageId) {
       case "elaboracion":
         return document.fechaCreacion
-      case "revision":
-        const revisionEntry = historial.find((h: any) => h.accion === "aprobado" || h.accion === "cambio_tipo")
+      case "revision": {
+        const revisionEntry = historial.find((h: { accion: string }) => h.accion === "aprobado" || h.accion === "cambio_tipo")
         return revisionEntry?.fecha
-      case "desarrollo":
-        const desarrolloEntry = historial.find((h: any) => h.accion === "documento_enviado")
+      }
+      case "desarrollo": {
+        const desarrolloEntry = historial.find((h: { accion: string }) => h.accion === "documento_enviado")
         return desarrolloEntry?.fecha
-      case "validacion":
-        const validacionEntry = historial.find((h: any) => h.accion === "validacion_aprobada")
+      }
+      case "validacion": {
+        const validacionEntry = historial.find((h: { accion: string }) => h.accion === "validacion_aprobada")
         return validacionEntry?.fecha
-      case "aprobacion":
+      }
+      case "aprobacion": {
         const aprobacionEntry = historial.find(
-          (h: any) => h.accion === "aprobado" && h.usuario === PROFESSIONAL_USERS.aprobador.name,
+          (h: { accion: string; usuario?: string }) => h.accion === "aprobado" && h.usuario === PROFESSIONAL_USERS.aprobador.name,
         )
         return aprobacionEntry?.fecha
+      }
       default:
         return null
     }
@@ -266,9 +262,9 @@ export default function TimelinePage() {
       y += 5
     }
 
-    printSection("OBJETIVO", document.objetivo)
-    printSection("ALCANCE", document.alcance)
-    printSection("DESARROLLO", document.desarrollo)
+    printSection("OBJETIVO", document.objetivo || "")
+    printSection("ALCANCE", document.alcance || "")
+    printSection("DESARROLLO", document.desarrollo || "")
 
     doc.setFontSize(10)
     doc.setTextColor("#666666")
@@ -350,35 +346,28 @@ export default function TimelinePage() {
            
               <div className="relative">
                 <div className="flex items-start justify-between mb-12">
-                  {stages.map((stage, index) => {
+                  {stages.map((stage) => {
                     const stageState = states[stage.id as keyof typeof states]
                     const stageDate = getStageDate(stage.id)
                     const IconComponent = stage.icon
 
                     return (
                       <div key={stage.id} className="flex flex-col items-center relative z-10 flex-1">
-                  
                         <div
                           className={`w-16 h-16 rounded-full flex items-center justify-center ${getStageColor(stageState)} border-4 border-white`}
                         >
                           {getStageIcon(stageState, IconComponent)}
                         </div>
-
-                 
                         <div className="mt-4 text-center max-w-32">
                           <h3 className="text-sm font-bold text-gray-900 mb-1">{stage.title}</h3>
                           <p className="text-xs text-gray-600 mb-2">{stage.description}</p>
-
-              
                           <div className="bg-gray-50 rounded-lg p-2 mb-2">
                             <p className="text-xs font-medium text-gray-800">{stage.user}</p>
                             <p className="text-xs text-gray-500">{stage.role}</p>
                           </div>
-
                           {stageDate && (
                             <p className="text-xs text-gray-500">{new Date(stageDate).toLocaleDateString("es-ES")}</p>
                           )}
-
                           <div className="mt-2">
                             {stageState === "completed" && (
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -432,16 +421,16 @@ export default function TimelinePage() {
                     Validadores Asignados
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {document.validadores.map((validatorId: string) => {
-                      const validator =
-                        validatorId === "4" ? PROFESSIONAL_USERS.validador1 : PROFESSIONAL_USERS.validador2
-                      return (
-                        <div key={validatorId} className="bg-white rounded-lg p-3 border">
-                          <p className="font-medium text-gray-900">{validator.name}</p>
-                          <p className="text-sm text-gray-600">Validador Técnico</p>
-                        </div>
-                      )
-                    })}
+                  {document.validadores.map((validatorId: string) => {
+                    const validator =
+                      validatorId === "4" ? PROFESSIONAL_USERS.validador1 : PROFESSIONAL_USERS.validador2
+                    return (
+                      <div key={validatorId} className="bg-white rounded-lg p-3 border">
+                        <p className="font-medium text-gray-900">{validator.name}</p>
+                        <p className="text-sm text-gray-600">Validador Técnico</p>
+                      </div>
+                    )
+                  })}
                   </div>
                 </div>
               )}
@@ -509,8 +498,8 @@ export default function TimelinePage() {
 
             
                     {document.historial
-                      ?.filter((h: any) => h.accion === "validacion_aprobada" && h.detalles)
-                      .map((entry: any) => (
+                      ?.filter((h: { accion: string; detalles?: string }) => h.accion === "validacion_aprobada" && h.detalles)
+                      .map((entry: { id: string; usuario: string; fecha: string; detalles?: string }) => (
                         <div key={entry.id} className="border rounded-lg p-4 bg-green-50 border-green-200">
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center space-x-2">
@@ -527,7 +516,7 @@ export default function TimelinePage() {
                       ))}
 
                     {!document.comentariosRevisor &&
-                      !document.historial?.some((h: any) => h.accion === "validacion_aprobada" && h.detalles) && (
+                      !document.historial?.some((h: { accion: string; detalles?: string }) => h.accion === "validacion_aprobada" && h.detalles) && (
                         <div className="text-center py-8 text-gray-500">
                           <p>No hay comentarios disponibles</p>
                         </div>

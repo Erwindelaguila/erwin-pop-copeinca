@@ -1,4 +1,8 @@
+
+
+
 "use client"
+import type { DocumentRequest } from "../../lib/types"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -32,7 +36,8 @@ export default function AprobadorPage() {
   const displayedRequests = activeTab === "historial" ? historialRequests : pendienteRequests
 
  
-  const handleVisualizarPrevia = (request: any) => {
+
+  const handleVisualizarPrevia = (request: DocumentRequest) => {
     router.push(`/aprobador/previa/${request.id}`)
   }
 

@@ -1,4 +1,6 @@
+
 "use client"
+import type { DocumentRequest } from "../../../lib/types"
 
 import { useState } from "react"
 import { Button } from "../../../components/ui/button"
@@ -17,12 +19,12 @@ import jsPDF from "jspdf"
 
 export default function RevisorTareaPage() {
   const { state, dispatch } = useAppContext()
-  const [selectedRequest, setSelectedRequest] = useState<any>(null)
+  const [selectedRequest, setSelectedRequest] = useState<DocumentRequest | null>(null)
   const [comments, setComments] = useState("")
   const [selectedValidators, setSelectedValidators] = useState<string[]>([])
 
   // Cuando se selecciona una solicitud, cargar comentarios y validadores existentes
-  const handleOpenRequest = (request: any) => {
+  const handleOpenRequest = (request: DocumentRequest) => {
     setSelectedRequest(request)
     setComments(request.comentariosRevisor || "")
     setSelectedValidators(request.validadores || [])
@@ -97,9 +99,9 @@ export default function RevisorTareaPage() {
       y += 5
     }
 
-    printSection("OBJETIVO", selectedRequest.objetivo)
-    printSection("ALCANCE", selectedRequest.alcance)
-    printSection("DESARROLLO", selectedRequest.desarrollo)
+    printSection("OBJETIVO", selectedRequest.objetivo || "")
+    printSection("ALCANCE", selectedRequest.alcance || "")
+    printSection("DESARROLLO", selectedRequest.desarrollo || "")
 
   
     doc.setFontSize(10)
@@ -165,7 +167,7 @@ export default function RevisorTareaPage() {
     })
 
 
-    setSelectedRequest((prev: any) =>
+    setSelectedRequest((prev: DocumentRequest | null) =>
       prev ? { ...prev, comentariosRevisor: comments, validadores: selectedValidators } : prev
     )
 
@@ -517,7 +519,7 @@ export default function RevisorTareaPage() {
                       Guardar
                     </Button>
                     <Button onClick={handleApprove} className="bg-[#00363B] hover:bg-[#00363B]/90 px-6 text-white">
-                      Aprobar
+                      Aceptar
                     </Button>
                   </div>
                 </div>

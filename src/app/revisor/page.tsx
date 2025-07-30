@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../componen
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import { toast } from "sonner"
 import { useAppContext } from "../../lib/store"
-import type { DocumentType } from "../../lib/types"
+import type { DocumentType, DocumentRequest } from "../../lib/types"
 import { RequestsTable } from "../../components/requests-table"
 import { StatusTabs } from "../../components/status-tabs"
 import { CheckCircle, XCircle, Eye } from "lucide-react"
@@ -15,7 +15,7 @@ import { CheckCircle, XCircle, Eye } from "lucide-react"
 export default function RevisorPage() {
   const router = useRouter()
   const { state, dispatch } = useAppContext()
-  const [selectedRequest, setSelectedRequest] = useState<any>(null)
+  const [selectedRequest, setSelectedRequest] = useState<DocumentRequest | null>(null)
   const [selectedType, setSelectedType] = useState<DocumentType | "">("")
   const [activeTab, setActiveTab] = useState<"historial" | "pendiente">("historial")
 
@@ -31,7 +31,7 @@ export default function RevisorPage() {
 
   const displayedRequests = activeTab === "historial" ? historialRequests : pendienteRequests
 
-  const handleReviewRequest = (request: any) => {
+  const handleReviewRequest = (request: DocumentRequest) => {
     setSelectedRequest(request)
     if (request.status === "en_revision") {
 
@@ -146,10 +146,10 @@ export default function RevisorPage() {
     setSelectedType("")
   }
 
-  const isTypeRequest = selectedRequest?.status === "en_revision"
 
 
-  const handleVisualizarPrevia = (request: any) => {
+
+  const handleVisualizarPrevia = (request: DocumentRequest) => {
     router.push(`/revisor/previa/${request.id}`)
   }
 
@@ -169,11 +169,11 @@ export default function RevisorPage() {
         showActions={true}
         isHistorial={activeTab === "historial"}
 
-        onReview={(request: any) => {
+        onReview={(request: DocumentRequest) => {
           if (request.status === "en_revision") handleReviewRequest(request)
         }}
 
-        customActions={(request: any) =>
+        customActions={(request: DocumentRequest) =>
           request.status === "documento_enviado" ? (
             <Button
               size="sm"

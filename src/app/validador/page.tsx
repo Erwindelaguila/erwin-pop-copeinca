@@ -1,4 +1,6 @@
+
 "use client"
+import type { DocumentRequest } from "../../lib/types"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -9,7 +11,7 @@ import { Button } from "../../components/ui/button"
 import { Eye } from "lucide-react"
 
 export default function ValidadorPage() {
-  const { state, dispatch } = useAppContext()
+  const { state } = useAppContext()
   const [activeTab, setActiveTab] = useState<"historial" | "pendiente">("historial")
   const router = useRouter()
 
@@ -34,8 +36,8 @@ export default function ValidadorPage() {
   )
 
   const displayedRequests = activeTab === "historial" ? historialRequests : pendienteRequests
-  
-  const handleVisualizarPrevia = (request: any) => {
+
+  const handleVisualizarPrevia = (request: DocumentRequest) => {
     router.push(`/validador/previa/${request.id}`)
   }
 
