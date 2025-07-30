@@ -13,16 +13,16 @@ export default function AprobadorPage() {
   const [activeTab, setActiveTab] = useState<"historial" | "pendiente">("historial")
   const router = useRouter()
 
-  // Documentos que llegan al aprobador
+
   const allRequests = state.requests.filter(
     (req) =>
       req.status === "enviado_aprobacion" ||
-      req.status === "en_aprobacion" || // ← AGREGADO: incluir documentos reservados
+      req.status === "en_aprobacion" || 
       req.status === "aprobado" ||
       req.status === "rechazado",
   )
 
-  // Historial: incluir documentos que ya están siendo procesados (en_aprobacion) + completados
+
   const historialRequests = allRequests.filter(
     (req) => req.status === "aprobado" || req.status === "rechazado" || req.status === "en_aprobacion",
   )
@@ -31,7 +31,7 @@ export default function AprobadorPage() {
 
   const displayedRequests = activeTab === "historial" ? historialRequests : pendienteRequests
 
-  // Función para ir a la vista previa
+ 
   const handleVisualizarPrevia = (request: any) => {
     router.push(`/aprobador/previa/${request.id}`)
   }

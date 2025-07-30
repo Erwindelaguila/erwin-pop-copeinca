@@ -54,6 +54,11 @@ export default function ElaboradorPage() {
       return true
     }
 
+    // Si fue liberado de tarea (nueva condición)
+    if (req.liberadoDeTarea) {
+      return true
+    }
+
     return false
   })
 
@@ -232,6 +237,11 @@ export default function ElaboradorPage() {
       return true
     }
 
+    // Si fue liberado de tarea → SIEMPRE vista previa
+    if (request.liberadoDeTarea) {
+      return true
+    }
+
     return false
   }
 
@@ -243,24 +253,18 @@ export default function ElaboradorPage() {
     const hasRevisorApproval = request.historial.some((h: any) => h.accion === "aprobado")
     const hasDocumentSent = request.historial.some((h: any) => h.accion === "documento_enviado")
 
+    // Si fue liberado de tarea → SIEMPRE vista previa
+    if (request.liberadoDeTarea) {
+      return true
+    }
+
     return hasRevisorComments || hasValidation || (hasRevisorApproval && hasDocumentSent)
   }
 
   return (
-
     <div className="container mx-auto p-6 space-y-6">
-
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">Solicitudes</h1>
-      </div>
-
-      <div className="flex items-center justify-between mb-4">
-        <StatusTabs
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          historialCount={historialRequests.length}
-          pendienteCount={pendienteRequests.length}
-        />
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
             <Button className="bg-[#00363B] hover:bg-[#00363B]/90">
@@ -282,6 +286,7 @@ export default function ElaboradorPage() {
                     <SelectItem value="procedimiento">Procedimiento</SelectItem>
                     <SelectItem value="instructivo">Instructivo</SelectItem>
                     <SelectItem value="manual">Manual</SelectItem>
+                    <SelectItem value="politica">Política</SelectItem>
                     <SelectItem value="formato">Formato</SelectItem>
                     <SelectItem value="norma">Norma</SelectItem>
                   </SelectContent>
@@ -303,6 +308,13 @@ export default function ElaboradorPage() {
           </DialogContent>
         </Dialog>
       </div>
+
+      <StatusTabs
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        historialCount={historialRequests.length}
+        pendienteCount={pendienteRequests.length}
+      />
 
       <RequestsTable
         data={displayedRequests}
@@ -362,10 +374,6 @@ export default function ElaboradorPage() {
             : undefined
         }
       />
-
-
-
-
 
       {/* Modal SOLO para FLUJO 1: Validación de tipo */}
       {selectedRequest && isTypeValidationFlow(selectedRequest) && (

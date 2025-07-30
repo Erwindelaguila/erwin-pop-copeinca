@@ -49,7 +49,7 @@ export default function RevisorTareaPage() {
     }
   }
 
-  // Generar PDF real usando jsPDF, soportando saltos de página y todas las secciones
+  
   const handleViewPDF = () => {
     if (!selectedRequest) return
 
@@ -60,7 +60,7 @@ export default function RevisorTareaPage() {
     const pageHeight = doc.internal.pageSize.getHeight()
     let y = margin
 
-    // Helper para salto de página
+ 
     const checkAddPage = (linesCount = 1) => {
       if (y + linesCount * lineHeight > pageHeight - 20) {
         doc.addPage()
@@ -68,7 +68,7 @@ export default function RevisorTareaPage() {
       }
     }
 
-    // Título principal
+
     doc.setFontSize(18)
     doc.setTextColor("#00363B")
     doc.text(`Documento: ${selectedRequest.numero}`, margin, y)
@@ -79,7 +79,6 @@ export default function RevisorTareaPage() {
     doc.text(getTypeLabel(selectedRequest.tipo).toUpperCase(), margin, y)
     y += 15
 
-    // Sección genérica con salto de página
     const printSection = (title: string, text: string) => {
       doc.setFontSize(12)
       doc.setTextColor("#00363B")
@@ -102,7 +101,7 @@ export default function RevisorTareaPage() {
     printSection("ALCANCE", selectedRequest.alcance)
     printSection("DESARROLLO", selectedRequest.desarrollo)
 
-    // Footer (solo en la última página)
+  
     doc.setFontSize(10)
     doc.setTextColor("#666666")
     doc.text(
@@ -153,7 +152,7 @@ export default function RevisorTareaPage() {
   const handleSave = () => {
     if (!selectedRequest || !state.user) return
 
-    // Actualizar el request en el estado global
+
     dispatch({
       type: "UPDATE_REQUEST",
       payload: {
@@ -165,7 +164,7 @@ export default function RevisorTareaPage() {
       },
     })
 
-    // Actualizar el objeto local para reflejar los cambios inmediatamente
+
     setSelectedRequest((prev: any) =>
       prev ? { ...prev, comentariosRevisor: comments, validadores: selectedValidators } : prev
     )
@@ -190,13 +189,13 @@ export default function RevisorTareaPage() {
     if (!selectedRequest || !state.user) return
 
     if (selectedValidators.length === 0) {
-      // Sin validadores - va al elaborador con botones Aprobar/Rechazar directos
+      
       dispatch({
         type: "UPDATE_REQUEST",
         payload: {
           id: selectedRequest.id,
           updates: {
-            status: "pendiente", // Va al elaborador
+            status: "pendiente", 
             comentariosRevisor: comments || "",
           },
         },
@@ -217,13 +216,13 @@ export default function RevisorTareaPage() {
 
       toast.success("Documento aprobado y enviado al elaborador para aceptación final")
     } else {
-      // Con validadores - enviar SOLO a validadores, NO al elaborador
+      
       dispatch({
         type: "UPDATE_REQUEST",
         payload: {
           id: selectedRequest.id,
           updates: {
-            status: "pendiente", // Va a validadores solamente, NO al elaborador
+            status: "pendiente", 
             comentariosRevisor: comments,
             validadores: selectedValidators,
           },
@@ -259,7 +258,7 @@ export default function RevisorTareaPage() {
       payload: {
         id: selectedRequest.id,
         updates: {
-          status: "documento_enviado", // Vuelve a pendiente para que aparezca en solicitudes
+          status: "documento_enviado", 
         },
       },
     })
@@ -332,7 +331,7 @@ export default function RevisorTareaPage() {
                 )}
               </DrawerHeader>
 
-              {/* Scrollable content area, takes all available space above footer */}
+    
               <div className="flex-1 min-h-0 overflow-y-auto">
                 <div className="p-4 sm:p-8 flex flex-col gap-8">
                   <Tabs defaultValue="documento" className="w-full">
@@ -488,11 +487,11 @@ export default function RevisorTareaPage() {
                     </TabsContent>
                   </Tabs>
                 </div>
-                {/* Add margin-bottom to last content block for better scroll */}
+
                 <div style={{ marginBottom: 128 }}></div>
               </div>
 
-              {/* Footer con botones sticky */}
+
               <div className="border-t border-gray-200 bg-gray-50/50 px-4 py-3 sticky bottom-0 left-0 right-0 z-20">
                 <div className="flex justify-between items-center">
                   <DrawerClose asChild>
@@ -509,7 +508,7 @@ export default function RevisorTareaPage() {
                       variant="outline"
                       className="px-6 border-orange-300 text-orange-700 hover:bg-orange-50 bg-transparent"
                     >
-                      Delegar
+                      Liberar
                     </Button>
                     <Button onClick={handleReject} variant="destructive" className="px-6">
                       Rechazar

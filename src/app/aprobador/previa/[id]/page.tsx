@@ -72,7 +72,7 @@ export default function AprobadorPreviaPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "enviado_aprobacion": // ← CORREGIDO
+      case "enviado_aprobacion": 
         return "bg-cyan-100 text-cyan-800 border-cyan-200"
       case "pendiente":
         return "bg-yellow-100 text-yellow-800 border-yellow-200"
@@ -81,11 +81,10 @@ export default function AprobadorPreviaPage() {
     }
   }
 
-  // Obtener comentarios del proceso
   const getComments = () => {
     const comments = []
 
-    // Comentarios del revisor
+   
     if (document.comentariosRevisor) {
       comments.push({
         type: "revisor",
@@ -113,7 +112,7 @@ export default function AprobadorPreviaPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header fijo */}
+ 
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -141,10 +140,10 @@ export default function AprobadorPreviaPage() {
         </div>
       </div>
 
-      {/* Contenido principal */}
+     
       <div className="container mx-auto px-6 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
-          {/* Información del documento */}
+    
           <Card className="border-l-4 border-l-[#00363B]">
             <CardHeader className="bg-gradient-to-r from-[#00363B] to-[#004d54] text-white">
               <div className="flex items-center justify-between">
@@ -204,9 +203,9 @@ export default function AprobadorPreviaPage() {
             </Card>
           )}
 
-          {/* Contenido del documento */}
+  
           <div className="space-y-6">
-            {/* Objetivo */}
+ 
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center text-lg">
@@ -223,7 +222,7 @@ export default function AprobadorPreviaPage() {
               </CardContent>
             </Card>
 
-            {/* Alcance */}
+
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center text-lg">
@@ -240,7 +239,7 @@ export default function AprobadorPreviaPage() {
               </CardContent>
             </Card>
 
-            {/* Desarrollo */}
+       
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center text-lg">
@@ -258,7 +257,7 @@ export default function AprobadorPreviaPage() {
             </Card>
           </div>
 
-          {/* Comentarios del proceso */}
+
           {getComments().length > 0 && (
             <Card>
               <CardHeader>
@@ -296,7 +295,6 @@ export default function AprobadorPreviaPage() {
             </Card>
           )}
 
-          {/* Historial del documento */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center text-lg">

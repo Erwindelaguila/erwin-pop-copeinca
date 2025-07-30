@@ -16,7 +16,7 @@ export default function ValidadorTareaPage() {
   const [selectedRequest, setSelectedRequest] = useState<any>(null)
   const [comments, setComments] = useState("")
 
-  // Documentos asignados específicamente a este validador en sus tareas
+
   const currentUserId = state.user?.id
   const validationTasks = state.requests.filter(
     (req) =>
@@ -25,11 +25,10 @@ export default function ValidadorTareaPage() {
       !req.historial.some((h) => h.usuario === state.user?.name && h.accion === "validacion_aprobada"),
   )
 
-  // PDF real con jsPDF (igual que el revisor)
   const handleViewPDF = () => {
     if (!selectedRequest) return
 
-    // @ts-ignore
+
     const jsPDF = (window as any).jsPDF || require("jspdf").default
     const doc = new jsPDF()
     const margin = 15
@@ -101,7 +100,7 @@ export default function ValidadorTareaPage() {
       payload: {
         id: selectedRequest.id,
         updates: {
-          status: "pendiente", // Vuelve al elaborador como vista previa
+          status: "pendiente", 
         },
       },
     })
@@ -139,13 +138,13 @@ export default function ValidadorTareaPage() {
       },
     })
 
-    // Cuando el validador aprueba, el documento va al elaborador
+  
     dispatch({
       type: "UPDATE_REQUEST",
       payload: {
         id: selectedRequest.id,
         updates: {
-          status: "pendiente", // Va al elaborador
+          status: "pendiente", 
         },
       },
     })
@@ -175,7 +174,7 @@ export default function ValidadorTareaPage() {
       payload: {
         id: selectedRequest.id,
         updates: {
-          status: "pendiente", // Vuelve a pendiente para que aparezca en solicitudes
+          status: "pendiente", 
         },
       },
     })
@@ -341,13 +340,13 @@ export default function ValidadorTareaPage() {
                       variant="outline"
                       className="px-6 border-orange-300 text-orange-700 hover:bg-orange-50 bg-transparent"
                     >
-                      Delegar
+                      Liberar
                     </Button>
                     <Button onClick={handleReject} variant="destructive" className="px-6">
-                      Rechazar
+                      No Conforme
                     </Button>
                     <Button onClick={handleApprove} className="bg-[#00363B] hover:bg-[#00363B]/90 px-6 text-white">
-                      Aprobar Validación
+                      Conforme
                     </Button>
                   </div>
                 </div>

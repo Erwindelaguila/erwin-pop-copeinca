@@ -41,7 +41,7 @@ export default function ElaboradorPreviaPage() {
       payload: {
         requestId: document.id,
         entry: {
-          accion: "tarea_creada", // Cambiado a un ActionType válido
+          accion: "tarea_creada", 
           usuario: state.user.name,
           fecha: new Date().toISOString(),
           detalles: "Documento reservado para revisión y desarrollo",
@@ -152,9 +152,9 @@ export default function ElaboradorPreviaPage() {
             </CardContent>
           </Card>
 
-          {/* Contenido del documento */}
+     
           <div className="space-y-6">
-            {/* Objetivo */}
+ 
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center text-lg">
@@ -171,7 +171,7 @@ export default function ElaboradorPreviaPage() {
               </CardContent>
             </Card>
 
-            {/* Alcance */}
+          
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center text-lg">
@@ -188,7 +188,7 @@ export default function ElaboradorPreviaPage() {
               </CardContent>
             </Card>
 
-            {/* Desarrollo */}
+        
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center text-lg">
@@ -206,7 +206,7 @@ export default function ElaboradorPreviaPage() {
             </Card>
           </div>
 
-          {/* Comentarios del revisor si existen */}
+         
           {document.comentariosRevisor && (
             <Card>
               <CardHeader>
@@ -223,7 +223,7 @@ export default function ElaboradorPreviaPage() {
             </Card>
           )}
 
-          {/* Historial del documento */}
+    
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center text-lg">

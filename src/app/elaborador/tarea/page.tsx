@@ -132,15 +132,20 @@ export default function ElaboradorTareaPage() {
     setFormData({ objetivo: "", alcance: "", desarrollo: "" })
   }
 
-  const handleDelegate = () => {
+  const handleLiberate = () => {
     if (!selectedRequest || !state.user) return
 
+    // GUARDAR los cambios antes de liberar
     dispatch({
       type: "UPDATE_REQUEST",
       payload: {
         id: selectedRequest.id,
         updates: {
-          status: "pendiente", // Vuelve a pendiente para que aparezca en solicitudes
+          objetivo: formData.objetivo,
+          alcance: formData.alcance,
+          desarrollo: formData.desarrollo,
+          status: "pendiente", // Vuelve a pendiente
+          liberadoDeTarea: true, // ← NUEVA FLAG para indicar que fue liberado de tarea
         },
       },
     })
@@ -153,13 +158,13 @@ export default function ElaboradorTareaPage() {
           accion: "enviado_revision",
           usuario: state.user.name,
           fecha: new Date().toISOString(),
-          detalles: "Tarea delegada - devuelta a solicitudes pendientes",
+          detalles: "Tarea liberada - cambios guardados y devuelta a solicitudes pendientes",
         },
       },
     })
 
-    toast.success("Tarea delegada", {
-      description: "La tarea ha sido devuelta a solicitudes pendientes",
+    toast.success("Tarea liberada", {
+      description: "Los cambios han sido guardados y la tarea devuelta a solicitudes pendientes",
     })
     handleCloseDrawer()
   }
@@ -289,9 +294,9 @@ export default function ElaboradorTareaPage() {
               )}
             </DrawerHeader>
 
-            {/* Scrollable content area: campos + comentarios */}
-            <div className="flex-1 min-h-0 overflow-y-auto">
-              <div className="p-4 sm:p-8 flex flex-col gap-8">
+            {/* Scrollable content area, takes all available space above footer */}
+            <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-8">
+              <div className="flex flex-col gap-8">
                 {/* Objetivo */}
                 <div className="flex flex-col gap-2 flex-1">
                   <Label className="text-sm font-bold text-gray-800 uppercase tracking-wide flex items-center">
@@ -327,7 +332,7 @@ export default function ElaboradorTareaPage() {
                 </div>
 
                 {/* Desarrollo */}
-                <div className="flex flex-col gap-2 flex-[2] mb-32">
+                <div className="flex flex-col gap-2 flex-[2]">
                   <Label className="text-sm font-bold text-gray-800 uppercase tracking-wide flex items-center">
                     <div className="w-1 h-4 bg-[#00363B] rounded mr-2"></div>
                     DESARROLLO
@@ -336,16 +341,16 @@ export default function ElaboradorTareaPage() {
                     value={formData.desarrollo}
                     onChange={(e) => setFormData((prev) => ({ ...prev, desarrollo: e.target.value }))}
                     placeholder="Desarrolla el contenido principal del documento..."
-                    className={`resize-y min-h-[240px] border-gray-300 focus:border-[#00363B] focus:ring-[#00363B] transition-colors text-base ${
+                    className={`resize-y min-h-[240px] max-h-[600px] border-gray-300 focus:border-[#00363B] focus:ring-[#00363B] transition-colors text-base ${
                       isReadOnly(selectedRequest) ? "bg-gray-100 cursor-not-allowed" : "bg-white"
                     }`}
                     readOnly={isReadOnly(selectedRequest)}
                   />
                 </div>
 
-                {/* Comentarios del proceso, solo si es revisión */}
+                {/* Comentarios solo si es revisión */}
                 {selectedRequest && isRevision(selectedRequest) && (
-                  <div className="space-y-6 mt-6 mb-32">
+                  <div className="space-y-6 mt-6">
                     <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                       <div className="flex items-center space-x-2 mb-6">
                         <MessageSquare className="h-5 w-5 text-[#00363B]" />
@@ -387,6 +392,8 @@ export default function ElaboradorTareaPage() {
                   </div>
                 )}
               </div>
+              {/* Invisible spacer for mobile keyboard, allows scrolling to bottom */}
+              <div style={{ minHeight: 128 }} aria-hidden="true"></div>
             </div>
 
             {/* Footer con botones sticky */}
@@ -402,10 +409,11 @@ export default function ElaboradorTareaPage() {
                 </DrawerClose>
                 <div className="flex space-x-3">
                   <Button
-                    onClick={handleDelegate}
-                    className="bg-red-600 hover:bg-red-700 text-white px-6 shadow-sm border-none"
+                    onClick={handleLiberate}
+                    variant="outline"
+                    className="px-6 border-orange-300 text-orange-700 hover:bg-orange-50 bg-transparent"
                   >
-                    Delegar
+                    Liberar
                   </Button>
                   <Button
                     onClick={handleSave}

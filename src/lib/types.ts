@@ -27,6 +27,7 @@ export type ActionType =
   | "validacion_aprobada"
   | "tarea_creada"
   | "documento_verificado"
+  | "liberado_creacion"
 
 export interface User {
   id: string
@@ -58,6 +59,7 @@ export interface DocumentRequest {
   validadores?: string[]
   comentariosRevisor?: string
   comentariosValidador?: string
+  liberadoDeTarea?: boolean
 }
 
 export interface HistoryEntry {

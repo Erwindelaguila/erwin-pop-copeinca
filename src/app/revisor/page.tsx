@@ -24,7 +24,7 @@ export default function RevisorPage() {
     (req) => req.status !== "en_revision" && req.status !== "documento_enviado",
   )
 
-  // Pendiente: solicitudes iniciales (tipo) + documentos enviados (contenido)
+
   const pendienteRequests = allRequests.filter(
     (req) => req.status === "en_revision" || req.status === "documento_enviado",
   )
@@ -34,7 +34,7 @@ export default function RevisorPage() {
   const handleReviewRequest = (request: any) => {
     setSelectedRequest(request)
     if (request.status === "en_revision") {
-      // Es solicitud de tipo
+
       setSelectedType(request.tipo)
     }
   }
@@ -45,13 +45,13 @@ export default function RevisorPage() {
     const isTypeChanged = selectedType !== selectedRequest.tipo
 
     if (isTypeChanged) {
-      // HAY cambio de tipo → va al elaborador como pendiente para aceptar
+
       dispatch({
         type: "UPDATE_REQUEST",
         payload: {
           id: selectedRequest.id,
           updates: {
-            status: "pendiente", // Va al elaborador para aceptar cambio
+            status: "pendiente", 
             tipoOriginal: selectedRequest.tipo,
             tipo: selectedType as DocumentType,
           },
@@ -79,13 +79,13 @@ export default function RevisorPage() {
         description: "Enviado al elaborador para aceptar el cambio",
       })
     } else {
-      // NO hay cambio de tipo → va directo a tareas del elaborador
+   
       dispatch({
         type: "UPDATE_REQUEST",
         payload: {
           id: selectedRequest.id,
           updates: {
-            status: "en_desarrollo", // Va directo a tareas
+            status: "en_desarrollo", 
           },
         },
       })
@@ -148,7 +148,7 @@ export default function RevisorPage() {
 
   const isTypeRequest = selectedRequest?.status === "en_revision"
 
-  // Función para ir a la vista previa
+
   const handleVisualizarPrevia = (request: any) => {
     router.push(`/revisor/previa/${request.id}`)
   }
@@ -168,11 +168,11 @@ export default function RevisorPage() {
         data={displayedRequests}
         showActions={true}
         isHistorial={activeTab === "historial"}
-        // Solo para en_revision, onReview activa el modal de Validar Tipo
+
         onReview={(request: any) => {
           if (request.status === "en_revision") handleReviewRequest(request)
         }}
-        // Para documento_enviado, mostrar "Visualizar Previa"
+
         customActions={(request: any) =>
           request.status === "documento_enviado" ? (
             <Button
@@ -200,7 +200,7 @@ export default function RevisorPage() {
             </div>
 
             <div className="space-y-6">
-              {/* Modal para validar tipo */}
+
               <div className="space-y-4">
                 <Select value={selectedType} onValueChange={(value: DocumentType) => setSelectedType(value)}>
                   <SelectTrigger className="h-12 w-full">
@@ -216,7 +216,6 @@ export default function RevisorPage() {
                 </Select>
               </div>
 
-              {/* Botones */}
               <div className="flex justify-between items-center pt-4 border-t border-gray-100">
                 <Button variant="outline" onClick={resetForm} className="px-6 bg-transparent">
                   Cancelar

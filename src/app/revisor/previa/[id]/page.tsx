@@ -25,13 +25,13 @@ export default function RevisorPreviaPage() {
   const handleReservar = () => {
     if (!document || !state.user) return
 
-    // Mover documento a tareas del revisor
+
     dispatch({
       type: "UPDATE_REQUEST",
       payload: {
         id: document.id,
         updates: {
-          status: "en_validacion", // Va a tareas del revisor
+          status: "en_validacion", 
         },
       },
     })
@@ -83,7 +83,7 @@ export default function RevisorPreviaPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header fijo */}
+
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -111,10 +111,10 @@ export default function RevisorPreviaPage() {
         </div>
       </div>
 
-      {/* Contenido principal */}
+
       <div className="container mx-auto px-6 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
-          {/* Información del documento */}
+  
           <Card className="border-l-4 border-l-[#00363B]">
             <CardHeader className="bg-gradient-to-r from-[#00363B] to-[#004d54] text-white">
               <div className="flex items-center justify-between">
@@ -148,9 +148,9 @@ export default function RevisorPreviaPage() {
             </CardContent>
           </Card>
 
-          {/* Contenido del documento */}
+ 
           <div className="space-y-6">
-            {/* Objetivo */}
+
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center text-lg">
@@ -184,7 +184,6 @@ export default function RevisorPreviaPage() {
               </CardContent>
             </Card>
 
-            {/* Desarrollo */}
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center text-lg">
@@ -202,7 +201,6 @@ export default function RevisorPreviaPage() {
             </Card>
           </div>
 
-          {/* Historial del documento */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center text-lg">

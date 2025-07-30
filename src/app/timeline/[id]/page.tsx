@@ -38,12 +38,12 @@ export default function TimelinePage() {
     )
   }
 
-  // Analizar el historial para determinar el progreso real
+
   const getTimelineStages = () => {
     const historial = document.historial || []
     const status = document.status
 
-    // Definir todas las etapas posibles
+
     const stages = [
       {
         id: "elaboracion",
@@ -87,19 +87,19 @@ export default function TimelinePage() {
       },
     ]
 
-    // Determinar el estado de cada etapa basado en el historial real
+   
     const stageStates = {
-      elaboracion: "completed", // Siempre completada si existe el documento
+      elaboracion: "completed", 
       revision: "pending",
       desarrollo: "pending",
       validacion: "pending",
       aprobacion: "pending",
     }
 
-    // Analizar historial para determinar estados
+  
     let currentStage = "elaboracion"
 
-    // Verificar revisión
+
     const hasRevisionActions = historial.some(
       (h: any) => h.accion === "aprobado" || h.accion === "cambio_tipo" || h.accion === "enviado_revision",
     )
@@ -111,7 +111,6 @@ export default function TimelinePage() {
       currentStage = "revision"
     }
 
-    // Verificar desarrollo
     const hasDocumentSent = historial.some((h: any) => h.accion === "documento_enviado")
     const isInDevelopment = status === "en_desarrollo"
     if (hasDocumentSent) {
@@ -122,7 +121,6 @@ export default function TimelinePage() {
       currentStage = "desarrollo"
     }
 
-    // Verificar validación
     const hasValidation = historial.some(
       (h: any) => h.accion === "validacion_aprobada" || h.accion === "enviado_validacion",
     )
@@ -135,7 +133,6 @@ export default function TimelinePage() {
       currentStage = "validacion"
     }
 
-    // Verificar aprobación final del gerente
     const hasAprobadorApproval = historial.some(
       (h: any) => h.accion === "aprobado" && h.usuario === PROFESSIONAL_USERS.aprobador.name,
     )
@@ -150,12 +147,11 @@ export default function TimelinePage() {
       currentStage = "rejected"
     }
 
-    // Si no hay validadores, saltar la etapa de validación
     const hasValidators = document.validadores && document.validadores.length > 0
     let filteredStages = stages
     if (!hasValidators && !hasValidation) {
       filteredStages = stages.filter((stage) => stage.id !== "validacion")
-      // Ajustar estados si no hay validación
+
       if (stageStates.desarrollo === "completed" && stageStates.validacion === "pending") {
         if (status === "enviado_aprobacion") {
           stageStates.aprobacion = "current"
@@ -227,7 +223,6 @@ export default function TimelinePage() {
     }
   }
 
-  // Generar PDF
   const handleViewPDF = () => {
     const doc = new jsPDF()
     const margin = 15
@@ -288,7 +283,7 @@ export default function TimelinePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header minimalista */}
+
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -311,10 +306,10 @@ export default function TimelinePage() {
         </div>
       </div>
 
-      {/* Contenido principal */}
+
       <div className="container mx-auto px-6 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
-          {/* Información del documento */}
+         
           <Card className="border-l-4 border-l-[#00363B]">
             <CardHeader className="bg-[#00363B] text-white">
               <div className="flex items-center justify-between">
@@ -346,13 +341,13 @@ export default function TimelinePage() {
             </CardContent>
           </Card>
 
-          {/* Timeline minimalista */}
+       
           <Card>
             <CardHeader>
               <CardTitle className="text-xl font-semibold">Progreso del Proceso</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              {/* Timeline horizontal */}
+           
               <div className="relative">
                 <div className="flex items-start justify-between mb-12">
                   {stages.map((stage, index) => {
@@ -362,30 +357,28 @@ export default function TimelinePage() {
 
                     return (
                       <div key={stage.id} className="flex flex-col items-center relative z-10 flex-1">
-                        {/* Círculo de la etapa */}
+                  
                         <div
                           className={`w-16 h-16 rounded-full flex items-center justify-center ${getStageColor(stageState)} border-4 border-white`}
                         >
                           {getStageIcon(stageState, IconComponent)}
                         </div>
 
-                        {/* Información de la etapa */}
+                 
                         <div className="mt-4 text-center max-w-32">
                           <h3 className="text-sm font-bold text-gray-900 mb-1">{stage.title}</h3>
                           <p className="text-xs text-gray-600 mb-2">{stage.description}</p>
 
-                          {/* Usuario responsable */}
+              
                           <div className="bg-gray-50 rounded-lg p-2 mb-2">
                             <p className="text-xs font-medium text-gray-800">{stage.user}</p>
                             <p className="text-xs text-gray-500">{stage.role}</p>
                           </div>
 
-                          {/* Fecha */}
                           {stageDate && (
                             <p className="text-xs text-gray-500">{new Date(stageDate).toLocaleDateString("es-ES")}</p>
                           )}
 
-                          {/* Estado sin emojis */}
                           <div className="mt-2">
                             {stageState === "completed" && (
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -414,7 +407,7 @@ export default function TimelinePage() {
                   })}
                 </div>
 
-                {/* Líneas conectoras */}
+        
                 <div className="absolute top-8 left-0 right-0 flex items-center justify-between px-8">
                   {stages.slice(0, -1).map((stage, index) => {
                     const currentState = states[stage.id as keyof typeof states]
@@ -431,7 +424,7 @@ export default function TimelinePage() {
                 </div>
               </div>
 
-              {/* Validadores minimalista */}
+         
               {document.validadores && document.validadores.length > 0 && (
                 <div className="mt-8 p-4 bg-gray-50 rounded-lg border">
                   <h4 className="font-medium text-gray-900 mb-3 flex items-center">
@@ -455,7 +448,7 @@ export default function TimelinePage() {
             </CardContent>
           </Card>
 
-          {/* Tabs minimalistas */}
+   
           <Tabs defaultValue="documento" className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-gray-100">
               <TabsTrigger value="documento" className="data-[state=active]:bg-white">
@@ -500,7 +493,7 @@ export default function TimelinePage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {/* Comentarios del revisor */}
+           
                     {document.comentariosRevisor && (
                       <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
                         <div className="flex items-center justify-between mb-2">
@@ -514,7 +507,7 @@ export default function TimelinePage() {
                       </div>
                     )}
 
-                    {/* Comentarios de validadores */}
+            
                     {document.historial
                       ?.filter((h: any) => h.accion === "validacion_aprobada" && h.detalles)
                       .map((entry: any) => (

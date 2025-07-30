@@ -433,7 +433,7 @@ export default function AprobadorTareaPage() {
                       variant="outline"
                       className="px-6 border-orange-300 text-orange-700 hover:bg-orange-50 bg-transparent"
                     >
-                      Delegar
+                      Liberar
                     </Button>
                     <Button onClick={handleReject} variant="destructive" className="px-6">
                       Rechazar
