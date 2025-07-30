@@ -9,6 +9,7 @@ export type DocumentStatus =
   | "documento_enviado"
   | "en_validacion"
   | "validacion_completada"
+  | "tarea_creada"
 
 export type DocumentType = "procedimiento" | "instructivo" | "manual" | "politica" | "formato" | "norma"
 
@@ -23,6 +24,8 @@ export type ActionType =
   | "documento_enviado"
   | "enviado_validacion"
   | "validacion_aprobada"
+  | "tarea_creada"
+  | "documento_verificado"
 
 export interface User {
   id: string
@@ -56,6 +59,8 @@ export interface DocumentRequest {
   validadores?: string[]
   // Comentarios del revisor
   comentariosRevisor?: string
+  // Comentarios del validador
+  comentariosValidador?: string
 }
 
 export interface HistoryEntry {

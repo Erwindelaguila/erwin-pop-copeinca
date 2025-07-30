@@ -57,15 +57,31 @@ export function RequestsTable({ data, onReview, showActions = true, isHistorial 
     }
   }
 
+  // Para el elaborador: lógica de acciones custom según el flujo
+  // FLUJO 1: Validación de tipo (modal SIEMPRE)
+  const isTypeValidationFlow = (request: any) => {
+    const hasValidation = request.historial?.some((h: any) => h.accion === "validacion_aprobada")
+    if (hasValidation) return false
+    if (request.tipoOriginal && request.historial?.some((h: any) => h.accion === "cambio_tipo")) return true
+    if (!request.tipoOriginal && request.historial?.some((h: any) => h.accion === "aprobado") && !request.objetivo && !request.alcance && !request.desarrollo) return true
+    return false
+  }
+  // FLUJO 2: Documento completo aprobado (botones directos SIEMPRE)
+  // Si el documento fue aprobado por el revisor y NO tiene validadores, debe ir al elaborador (no al aprobador)
+  const isDocumentApprovedFlow = (request: any) => {
+    const hasValidation = request.historial?.some((h: any) => h.accion === "validacion_aprobada")
+    if (hasValidation) return true
+    const hasRevisorApproval = request.historial?.some((h: any) => h.accion === "aprobado")
+    // Si fue aprobado por el revisor y NO tiene validadores, va al elaborador
+    if (hasRevisorApproval && (!request.validadores || request.validadores.length === 0)) return true
+    // Si fue aprobado por el revisor y tiene contenido, pero sí tiene validadores, NO va al elaborador
+    if (hasRevisorApproval && (request.objetivo || request.alcance || request.desarrollo) && (!request.validadores || request.validadores.length === 0)) return true
+    return false
+  }
+  // Si no es ninguno de los dos flujos, fallback a Revisar
   const getButtonText = (item: DocumentRequest) => {
-    // Si el documento está en pendiente y viene de validación, mostrar 'Aprobar'
-    if (item.status === "pendiente" && Array.isArray(item.historial) && item.historial.some((h: any) => h.accion === "validacion_aprobada")) {
-      return "Aprobar"
-    }
-    // Si está en validación y tiene validadores, mostrar Aprobar
-    if (item.status === "en_validacion" && item.validadores?.length) {
-      return "Aprobar"
-    }
+    if (isTypeValidationFlow(item)) return "Revisar"
+    if (isDocumentApprovedFlow(item)) return "Aprobar"
     switch (item.status) {
       case "en_revision":
         return "Validar Tipo"
@@ -77,20 +93,6 @@ export function RequestsTable({ data, onReview, showActions = true, isHistorial 
         return "Revisar Documento"
       case "validacion_completada":
         return "Aprobar Final"
-      case "pendiente":
-        // Si viene de validación, mostrar Aprobar
-        if (Array.isArray(item.historial) && item.historial.some((h: any) => h.accion === "validacion_aprobada")) {
-          return "Aprobar"
-        }
-        // Si viene de cambio de tipo, mostrar Aprobar
-        if (item.tipoOriginal) {
-          return "Aprobar"
-        }
-        // Si viene de aprobado, mostrar Aprobar
-        if (Array.isArray(item.historial) && item.historial.some((h: any) => h.accion === "aprobado")) {
-          return "Aprobar"
-        }
-        return "Revisar"
       default:
         return "Revisar"
     }

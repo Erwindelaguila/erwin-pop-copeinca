@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { createContext, useContext, useReducer, useEffect, type ReactNode } from "react"
 import type { AppState, AppAction, DocumentRequest, HistoryEntry } from "@/lib/types"
 
@@ -14,7 +13,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case "SET_USER":
       return { ...state, user: action.payload }
-
     case "CREATE_REQUEST": {
       const newRequest: DocumentRequest = {
         ...action.payload,
@@ -28,12 +26,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
             accion: "solicitud_creada",
             usuario: action.payload.elaboradorName,
             fecha: new Date().toISOString(),
+            detalles: "Solicitud creada y enviada al revisor",
           },
         ],
       }
       return { ...state, requests: [...state.requests, newRequest] }
     }
-
     case "UPDATE_REQUEST": {
       return {
         ...state,
@@ -48,13 +46,11 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ),
       }
     }
-
     case "ADD_HISTORY": {
       const historyEntry: HistoryEntry = {
         ...action.payload.entry,
         id: generateId(),
       }
-
       return {
         ...state,
         requests: state.requests.map((req) =>
@@ -62,10 +58,8 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ),
       }
     }
-
     case "LOAD_STATE":
       return action.payload
-
     default:
       return state
   }
@@ -126,6 +120,7 @@ export function getStatusLabel(status: string): string {
     validacion_completada: "Validación Completada",
     aprobado: "Aprobado",
     rechazado: "Rechazado",
+    tarea_creada: "Tarea Creada",
   }
   return labels[status as keyof typeof labels] || status
 }
@@ -154,6 +149,8 @@ export function getActionLabel(action: string): string {
     documento_enviado: "Documento Enviado",
     enviado_validacion: "Enviado a Validación",
     validacion_aprobada: "Validación Aprobada",
+    tarea_creada: "Tarea Creada",
+    documento_verificado: "Documento Verificado",
   }
   return labels[action as keyof typeof labels] || action
 }

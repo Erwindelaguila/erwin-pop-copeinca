@@ -13,11 +13,12 @@ export default function AprobadorPage() {
   const allRequests = state.requests.filter(
     (req) =>
       req.status === "validacion_completada" ||
+      req.status === "pendiente" ||
       (req.historial && req.historial.some((h) => h.accion === "validacion_aprobada")),
   )
 
-  const historialRequests = allRequests.filter((req) => req.status !== "validacion_completada")
-  const pendienteRequests = allRequests.filter((req) => req.status === "validacion_completada")
+  const historialRequests = allRequests.filter((req) => req.status !== "validacion_completada" && req.status !== "pendiente")
+  const pendienteRequests = allRequests.filter((req) => req.status === "validacion_completada" || req.status === "pendiente")
 
   const displayedRequests = activeTab === "historial" ? historialRequests : pendienteRequests
 

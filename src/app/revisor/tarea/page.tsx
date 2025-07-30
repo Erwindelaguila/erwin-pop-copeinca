@@ -20,9 +20,8 @@ export default function RevisorTareaPage() {
   const [selectedRequest, setSelectedRequest] = useState<any>(null)
   const [comments, setComments] = useState("")
   const [selectedValidators, setSelectedValidators] = useState<string[]>([])
-
   // Documentos en tareas del revisor
-  const documentTasks = state.requests.filter((req) => req.status === "en_validacion" && !req.validadores?.length)
+  const documentTasks = state.requests.filter((req) => req.status === "en_validacion")
 
   const handleAddValidator = (validatorId: string) => {
     if (validatorId && !selectedValidators.includes(validatorId)) {
@@ -163,16 +162,15 @@ export default function RevisorTareaPage() {
 
   const handleApprove = () => {
     if (!selectedRequest || !state.user) return
-
     if (selectedValidators.length === 0) {
-      // Sin validadores - va directo al aprobador
+      // Sin validadores - va al elaborador con botones Aprobar/Rechazar directos
       dispatch({
         type: "UPDATE_REQUEST",
         payload: {
           id: selectedRequest.id,
           updates: {
-            status: "validacion_completada",
-            comentariosRevisor: comments,
+            status: "pendiente", // Va al elaborador
+            comentariosRevisor: comments || "",
           },
         },
       })
@@ -185,12 +183,12 @@ export default function RevisorTareaPage() {
             accion: "aprobado",
             usuario: state.user.name,
             fecha: new Date().toISOString(),
-            detalles: "Documento aprobado sin validadores - enviado al aprobador",
+            detalles: "Documento aprobado por el revisor - enviado al elaborador para aceptación final",
           },
         },
       })
 
-      toast.success("Documento aprobado. Documento enviado directamente al aprobador")
+      toast.success("Documento aprobado y enviado al elaborador para aceptación final")
     } else {
       // Con validadores - enviar a todos los seleccionados
       dispatch({
@@ -235,12 +233,23 @@ export default function RevisorTareaPage() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold text-gray-900">Tareas Pendientes</h1>
-
       <RequestsTable
         data={documentTasks}
         onReview={(request) => setSelectedRequest(request)}
         showActions={true}
         isHistorial={false}
+        customActions={(request) => (
+          <Button
+            size="sm"
+            className="bg-[#00363B] hover:bg-[#00363B]/90"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedRequest(request);
+            }}
+          >
+            Revisar Documento
+          </Button>
+        )}
       />
 
       {selectedRequest && (
