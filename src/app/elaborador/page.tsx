@@ -2,15 +2,26 @@
 
 import { useState } from "react"
 import { Plus } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Button } from "../../components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import { toast } from "sonner"
-import { useAppContext, getTypeLabel } from "@/lib/store"
-import type { DocumentType } from "@/lib/types"
-import { RequestsTable } from "@/components/requests-table"
-import { StatusTabs } from "@/components/status-tabs"
-import { CheckCircle, XCircle, ArrowRight } from "lucide-react"
+import { useAppContext, getTypeLabel } from "../../lib/store"
+import type { DocumentType } from "../../lib/types"
+import { RequestsTable } from "../../components/requests-table"
+import { StatusTabs } from "../../components/status-tabs"
+import { CheckCircle, XCircle, ArrowRight, Eye } from "lucide-react"
+import { useRouter } from "next/navigation"
+
+// Declare the isTypeValidationFlow function
+const isTypeValidationFlow = (request: any) => {
+  return (
+    request.tipoOriginal &&
+    !request.historial.some(
+      (h: any) => h.usuario === request.elaboradorName && (h.accion === "tarea_creada" || h.accion === "rechazado"),
+    )
+  )
+}
 
 export default function ElaboradorPage() {
   const { state, dispatch } = useAppContext()
@@ -23,14 +34,32 @@ export default function ElaboradorPage() {
   const historialRequests = userRequests.filter((req) => req.status !== "pendiente")
 
   // Pendiente: solicitudes que vuelven del revisor/validador para aceptar
-  const pendienteRequests = userRequests.filter(
-    (req) =>
-      req.status === "pendiente" &&
-      (req.tipoOriginal ||
-        req.historial.some((h: { accion: string }) => h.accion === "validacion_aprobada" || h.accion === "aprobado")),
-  )
+  const pendienteRequests = userRequests.filter((req) => {
+    if (req.status !== "pendiente") return false
+
+    // Si tiene tipoOriginal (cambio de tipo), siempre mostrar
+    if (req.tipoOriginal) return true
+
+    // Si viene del revisor SIN validadores
+    const hasRevisorApproval = req.historial.some((h: { accion: string }) => h.accion === "aprobado")
+    const hasValidators = req.validadores && req.validadores.length > 0
+
+    if (hasRevisorApproval && !hasValidators) {
+      return true
+    }
+
+    // Si viene del validador (después de validación completada)
+    const hasValidation = req.historial.some((h: { accion: string }) => h.accion === "validacion_aprobada")
+    if (hasValidation) {
+      return true
+    }
+
+    return false
+  })
 
   const displayedRequests = activeTab === "historial" ? historialRequests : pendienteRequests
+
+  const router = useRouter()
 
   const handleCreateRequest = () => {
     if (!state.user || !selectedType) return
@@ -123,7 +152,7 @@ export default function ElaboradorPage() {
       payload: {
         id: request.id,
         updates: {
-          status: "en_desarrollo",
+          status: "enviado_aprobacion", // ← AQUÍ SÍ va al aprobador (cuando acepta después de revisión)
         },
       },
     })
@@ -133,15 +162,15 @@ export default function ElaboradorPage() {
       payload: {
         requestId: request.id,
         entry: {
-          accion: "tarea_creada",
+          accion: "documento_enviado",
           usuario: state.user.name,
           fecha: new Date().toISOString(),
-          detalles: "Documento aceptado - tarea creada",
+          detalles: "Documento aceptado y enviado al aprobador para aprobación final",
         },
       },
     })
 
-    toast.success("Documento aceptado")
+    toast.success("Documento aceptado y enviado al aprobador")
   }
 
   const handleRejectChangeDirect = (request: any) => {
@@ -173,85 +202,65 @@ export default function ElaboradorPage() {
     toast.error("Documento rechazado")
   }
 
-  // FLUJO 1: Validación de tipo (SOLO la primera vez que llega con cambio de tipo)
-  const isTypeValidationFlow = (request: any) => {
-    console.log("🔍 DEBUG isTypeValidationFlow para:", request.numero)
-
-    // Si tiene tipoOriginal Y NO ha sido procesado por el elaborador → modal
-    if (request.tipoOriginal) {
-      const hasElaboradorResponse = request.historial.some(
-        (h: any) => h.usuario === state.user?.name && (h.accion === "tarea_creada" || h.accion === "rechazado"),
-      )
-      console.log("🔄 Ya fue procesado por elaborador:", hasElaboradorResponse)
-
-      if (!hasElaboradorResponse) {
-        console.log("🎯 RESULTADO: Modal (primera vez con tipoOriginal)")
-        return true
-      } else {
-        console.log("🎯 RESULTADO: NO modal (ya fue procesado)")
-        return false
-      }
-    }
-
-    // Si viene de aprobación inicial (sin documento_enviado previo) → modal
-    const hasInitialApproval = request.historial.some((h: any) => h.accion === "aprobado")
-    const hasDocumentSent = request.historial.some((h: any) => h.accion === "documento_enviado")
-
-    console.log("👨‍💼 Tiene aprobación inicial:", hasInitialApproval)
-    console.log("📤 Tiene documento enviado:", hasDocumentSent)
-
-    if (hasInitialApproval && !hasDocumentSent) {
-      console.log("🎯 RESULTADO: Modal (aprobación inicial sin documento)")
-      return true
-    }
-
-    console.log("🎯 RESULTADO: NO es validación de tipo")
-    return false
+  // Agregar esta función antes del return
+  const handleVisualizarPrevia = (request: any) => {
+    router.push(`/elaborador/previa/${request.id}`)
   }
 
-  // FLUJO 2: Documento ya creado y enviado (SIEMPRE botones directos, con o sin comentarios)
+  // Actualizar la función isDocumentApprovedFlow para incluir el botón de visualizar previa
   const isDocumentApprovedFlow = (request: any) => {
-    console.log("🔍 DEBUG isDocumentApprovedFlow para:", request.numero)
-
     // Si tiene tipoOriginal Y ya fue procesado → botones directos
     if (request.tipoOriginal) {
       const hasElaboradorResponse = request.historial.some(
         (h: any) => h.usuario === state.user?.name && (h.accion === "tarea_creada" || h.accion === "rechazado"),
       )
       if (hasElaboradorResponse) {
-        console.log("🎯 RESULTADO: Botones directos (tipoOriginal ya procesado)")
         return true
       }
     }
 
     // Viene del validador → SIEMPRE botones directos
     const hasValidation = request.historial.some((h: any) => h.accion === "validacion_aprobada")
-    console.log("✅ Tiene validación:", hasValidation)
     if (hasValidation) {
-      console.log("🎯 RESULTADO: Botones directos (validación)")
       return true
     }
 
     // Viene del revisor DESPUÉS de documento_enviado → SIEMPRE botones directos (con o sin comentarios)
     const hasRevisorApproval = request.historial.some((h: any) => h.accion === "aprobado")
     const hasDocumentSent = request.historial.some((h: any) => h.accion === "documento_enviado")
-
-    console.log("👨‍💼 Tiene aprobación revisor:", hasRevisorApproval)
-    console.log("📤 Tiene documento enviado:", hasDocumentSent)
-
     if (hasRevisorApproval && hasDocumentSent) {
-      console.log("🎯 RESULTADO: Botones directos (documento enviado + aprobado)")
       return true
     }
 
-    console.log("🎯 RESULTADO: NO es documento aprobado")
     return false
   }
 
+  // Agregar función para determinar si debe mostrar "Visualizar Previa"
+  const shouldShowVisualizarPrevia = (request: any) => {
+    // Si viene del revisor con comentarios o después de validación
+    const hasRevisorComments = request.comentariosRevisor
+    const hasValidation = request.historial.some((h: any) => h.accion === "validacion_aprobada")
+    const hasRevisorApproval = request.historial.some((h: any) => h.accion === "aprobado")
+    const hasDocumentSent = request.historial.some((h: any) => h.accion === "documento_enviado")
+
+    return hasRevisorComments || hasValidation || (hasRevisorApproval && hasDocumentSent)
+  }
+
   return (
+
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+
+      <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Solicitudes</h1>
+      </div>
+
+      <div className="flex items-center justify-between mb-4">
+        <StatusTabs
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          historialCount={historialRequests.length}
+          pendienteCount={pendienteRequests.length}
+        />
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
             <Button className="bg-[#00363B] hover:bg-[#00363B]/90">
@@ -273,7 +282,6 @@ export default function ElaboradorPage() {
                     <SelectItem value="procedimiento">Procedimiento</SelectItem>
                     <SelectItem value="instructivo">Instructivo</SelectItem>
                     <SelectItem value="manual">Manual</SelectItem>
-                    <SelectItem value="politica">Política</SelectItem>
                     <SelectItem value="formato">Formato</SelectItem>
                     <SelectItem value="norma">Norma</SelectItem>
                   </SelectContent>
@@ -296,13 +304,6 @@ export default function ElaboradorPage() {
         </Dialog>
       </div>
 
-      <StatusTabs
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        historialCount={historialRequests.length}
-        pendienteCount={pendienteRequests.length}
-      />
-
       <RequestsTable
         data={displayedRequests}
         showActions={true}
@@ -323,22 +324,37 @@ export default function ElaboradorPage() {
                   )
                 }
 
-                // FLUJO 2: Documento completo → Botones directos (incluye tipoOriginal ya procesado)
+                // FLUJO 2: Documento completo → Verificar si debe mostrar vista previa o botones directos
                 if (isDocumentApprovedFlow(request)) {
-                  return (
-                    <div className="flex gap-2">
+                  // Si debe mostrar vista previa (tiene comentarios del revisor o viene de validación)
+                  if (shouldShowVisualizarPrevia(request)) {
+                    return (
                       <Button
                         size="sm"
                         className="bg-[#00363B] hover:bg-[#00363B]/90"
-                        onClick={() => handleAcceptChangeDirect(request)}
+                        onClick={() => handleVisualizarPrevia(request)}
                       >
-                        Aprobar
+                        <Eye className="h-4 w-4 mr-2" />
+                        Visualizar Previa
                       </Button>
-                      <Button size="sm" variant="destructive" onClick={() => handleRejectChangeDirect(request)}>
-                        Rechazar
-                      </Button>
-                    </div>
-                  )
+                    )
+                  } else {
+                    // Botones directos para casos simples
+                    return (
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          className="bg-[#00363B] hover:bg-[#00363B]/90"
+                          onClick={() => handleAcceptChangeDirect(request)}
+                        >
+                          Aprobar
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => handleRejectChangeDirect(request)}>
+                          Rechazar
+                        </Button>
+                      </div>
+                    )
+                  }
                 }
 
                 return undefined
@@ -346,6 +362,10 @@ export default function ElaboradorPage() {
             : undefined
         }
       />
+
+
+
+
 
       {/* Modal SOLO para FLUJO 1: Validación de tipo */}
       {selectedRequest && isTypeValidationFlow(selectedRequest) && (

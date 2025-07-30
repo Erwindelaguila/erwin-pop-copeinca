@@ -8,10 +8,11 @@ export type DocumentStatus =
   | "en_desarrollo"
   | "documento_enviado"
   | "en_validacion"
-  | "validacion_completada"
+  | "enviado_aprobacion"
+  | "en_aprobacion"
   | "tarea_creada"
 
-export type DocumentType = "procedimiento" | "instructivo" | "manual" | "politica" | "formato" | "norma"
+export type DocumentType = "procedimiento" | "instructivo" | "manual" | "formato" | "norma"
 
 export type ActionType =
   | "solicitud_creada"
@@ -51,15 +52,11 @@ export interface DocumentRequest {
   fechaActualizacion: string
   comentarios?: string
   historial: HistoryEntry[]
-  // Campos del documento
   objetivo?: string
   alcance?: string
   desarrollo?: string
-  // Validadores asignados
   validadores?: string[]
-  // Comentarios del revisor
   comentariosRevisor?: string
-  // Comentarios del validador
   comentariosValidador?: string
 }
 

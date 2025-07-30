@@ -2,11 +2,32 @@
 
 import type React from "react"
 import { createContext, useContext, useReducer, useEffect, type ReactNode } from "react"
-import type { AppState, AppAction, DocumentRequest, HistoryEntry } from "@/lib/types"
+import type { AppState, AppAction, DocumentRequest, HistoryEntry } from "./types"
 
 const initialState: AppState = {
   user: null,
   requests: [],
+}
+
+export const PROFESSIONAL_USERS = {
+  elaborador: { id: "1", name: "Victor Castañeda", role: "elaborador" as const },
+  revisor: { id: "2", name: "Sidny Paredes", role: "revisor" as const },
+  aprobador: { id: "3", name: "Gerente de Copeinca", role: "aprobador" as const },
+  validador1: { id: "4", name: "Erwin del Aguila", role: "validador" as const },
+  validador2: { id: "5", name: "Ivan Sanchez", role: "validador" as const },
+}
+function getRealUserName(userId: string, role: string): string {
+  if (role === "validador") {
+    return userId === "4" ? "Erwin del Aguila" : "Ivan Sanchez"
+  }
+
+  const userMap = {
+    elaborador: "Victor Castañeda",
+    revisor: "Sidny Paredes",
+    aprobador: "Gerente de Copeinca",
+  }
+
+  return userMap[role as keyof typeof userMap] || "Usuario"
 }
 
 function appReducer(state: AppState, action: AppAction): AppState {
@@ -100,7 +121,6 @@ export function useAppContext() {
   return context
 }
 
-// Utility functions
 function generateId(): string {
   return Math.random().toString(36).substr(2, 9)
 }
@@ -113,14 +133,17 @@ function generateDocumentNumber(): string {
 export function getStatusLabel(status: string): string {
   const labels = {
     pendiente: "Pendiente",
-    en_revision: "En Revisión",
-    en_desarrollo: "En Desarrollo",
+    en_revision: "Revisión",
+    en_desarrollo: "Desarrollo", 
     documento_enviado: "Documento Enviado",
-    en_validacion: "En Validación",
-    validacion_completada: "Validación Completada",
+    en_validacion: "Validación", 
+    enviado_aprobacion: "Enviado a Aprobación",
+    en_aprobacion: "Aprobación", 
     aprobado: "Aprobado",
     rechazado: "Rechazado",
     tarea_creada: "Tarea Creada",
+    aceptado: "Aceptado",
+    documento_aceptado: "Documento Aceptado",
   }
   return labels[status as keyof typeof labels] || status
 }
@@ -130,7 +153,6 @@ export function getTypeLabel(type: string): string {
     procedimiento: "Procedimiento",
     instructivo: "Instructivo",
     manual: "Manual",
-    politica: "Política",
     formato: "Formato",
     norma: "Norma",
   }
@@ -151,6 +173,11 @@ export function getActionLabel(action: string): string {
     validacion_aprobada: "Validación Aprobada",
     tarea_creada: "Tarea Creada",
     documento_verificado: "Documento Verificado",
+    aceptado: "Aceptado",
+    documento_aceptado: "Documento Aceptado",
+    reservado: "Reservado",
   }
   return labels[action as keyof typeof labels] || action
 }
+
+export { getRealUserName }

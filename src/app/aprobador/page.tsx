@@ -1,26 +1,40 @@
 "use client"
 
 import { useState } from "react"
-import { useAppContext } from "@/lib/store"
-import { RequestsTable } from "@/components/requests-table"
-import { StatusTabs } from "@/components/status-tabs"
+import { useRouter } from "next/navigation"
+import { useAppContext } from "../../lib/store"
+import { RequestsTable } from "../../components/requests-table"
+import { StatusTabs } from "../../components/status-tabs"
+import { Button } from "../../components/ui/button"
+import { Eye } from "lucide-react"
 
 export default function AprobadorPage() {
   const { state } = useAppContext()
   const [activeTab, setActiveTab] = useState<"historial" | "pendiente">("historial")
+  const router = useRouter()
 
-  // Documentos que llegan al aprobador desde validación
+  // Documentos que llegan al aprobador
   const allRequests = state.requests.filter(
     (req) =>
-      req.status === "validacion_completada" ||
-      req.status === "pendiente" ||
-      (req.historial && req.historial.some((h) => h.accion === "validacion_aprobada")),
+      req.status === "enviado_aprobacion" ||
+      req.status === "en_aprobacion" || // ← AGREGADO: incluir documentos reservados
+      req.status === "aprobado" ||
+      req.status === "rechazado",
   )
 
-  const historialRequests = allRequests.filter((req) => req.status !== "validacion_completada" && req.status !== "pendiente")
-  const pendienteRequests = allRequests.filter((req) => req.status === "validacion_completada" || req.status === "pendiente")
+  // Historial: incluir documentos que ya están siendo procesados (en_aprobacion) + completados
+  const historialRequests = allRequests.filter(
+    (req) => req.status === "aprobado" || req.status === "rechazado" || req.status === "en_aprobacion",
+  )
+
+  const pendienteRequests = allRequests.filter((req) => req.status === "enviado_aprobacion")
 
   const displayedRequests = activeTab === "historial" ? historialRequests : pendienteRequests
+
+  // Función para ir a la vista previa
+  const handleVisualizarPrevia = (request: any) => {
+    router.push(`/aprobador/previa/${request.id}`)
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -35,9 +49,22 @@ export default function AprobadorPage() {
 
       <RequestsTable
         data={displayedRequests}
-        onReview={activeTab === "pendiente" ? (request) => console.log("Revisar:", request) : undefined}
         showActions={true}
         isHistorial={activeTab === "historial"}
+        customActions={
+          activeTab === "pendiente"
+            ? (request) => (
+                <Button
+                  size="sm"
+                  className="bg-[#00363B] hover:bg-[#00363B]/90 text-white text-sm"
+                  onClick={() => handleVisualizarPrevia(request)}
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Visualizar Previa
+                </Button>
+              )
+            : undefined
+        }
       />
     </div>
   )

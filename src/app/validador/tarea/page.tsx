@@ -1,23 +1,22 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
+import { Button } from "../../../components/ui/button"
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "../../../components/ui/drawer"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs"
+import { Textarea } from "../../../components/ui/textarea"
+import { Label } from "../../../components/ui/label"
 import { toast } from "sonner"
-import { useAppContext, getTypeLabel } from "@/lib/store"
-import { RequestsTable } from "@/components/requests-table"
-import { FileText, MessageSquare, ExternalLink, CheckCircle, XCircle } from "lucide-react"
+import { useAppContext, getTypeLabel } from "../../../lib/store"
+import { RequestsTable } from "../../../components/requests-table"
+import { FileText, MessageSquare, ExternalLink } from "lucide-react"
 
 export default function ValidadorTareaPage() {
   const { state, dispatch } = useAppContext()
-  // toast de sonner
   const [selectedRequest, setSelectedRequest] = useState<any>(null)
   const [comments, setComments] = useState("")
 
-  // Documentos asignados específicamente adame  este validador en sus tareas
+  // Documentos asignados específicamente a este validador en sus tareas
   const currentUserId = state.user?.id
   const validationTasks = state.requests.filter(
     (req) =>
@@ -26,12 +25,12 @@ export default function ValidadorTareaPage() {
       !req.historial.some((h) => h.usuario === state.user?.name && h.accion === "validacion_aprobada"),
   )
 
-
   // PDF real con jsPDF (igual que el revisor)
   const handleViewPDF = () => {
     if (!selectedRequest) return
+
     // @ts-ignore
-    const jsPDF = (window as any).jsPDF || require('jspdf').default
+    const jsPDF = (window as any).jsPDF || require("jspdf").default
     const doc = new jsPDF()
     const margin = 15
     const maxWidth = 180
@@ -47,23 +46,25 @@ export default function ValidadorTareaPage() {
     }
 
     doc.setFontSize(18)
-    doc.setTextColor('#00363B')
+    doc.setTextColor("#00363B")
     doc.text(`Documento: ${selectedRequest.numero}`, margin, y)
     y += 10
+
     doc.setFontSize(14)
-    doc.setTextColor('#666666')
+    doc.setTextColor("#666666")
     doc.text(getTypeLabel(selectedRequest.tipo).toUpperCase(), margin, y)
     y += 15
 
     const printSection = (title: string, text: string) => {
       doc.setFontSize(12)
-      doc.setTextColor('#00363B')
+      doc.setTextColor("#00363B")
       checkAddPage()
       doc.text(title, margin, y)
       y += lineHeight
+
       doc.setFontSize(11)
-      doc.setTextColor('#333333')
-      const lines = doc.splitTextToSize(text || 'No especificado', maxWidth)
+      doc.setTextColor("#333333")
+      const lines = doc.splitTextToSize(text || "No especificado", maxWidth)
       for (let i = 0; i < lines.length; i++) {
         checkAddPage()
         doc.text(lines[i], margin, y)
@@ -72,24 +73,24 @@ export default function ValidadorTareaPage() {
       y += 5
     }
 
-    printSection('OBJETIVO', selectedRequest.objetivo)
-    printSection('ALCANCE', selectedRequest.alcance)
-    printSection('DESARROLLO', selectedRequest.desarrollo)
+    printSection("OBJETIVO", selectedRequest.objetivo)
+    printSection("ALCANCE", selectedRequest.alcance)
+    printSection("DESARROLLO", selectedRequest.desarrollo)
 
     doc.setFontSize(10)
-    doc.setTextColor('#666666')
+    doc.setTextColor("#666666")
     doc.text(
-      `Documento generado el ${selectedRequest.fechaCreacion ? new Date(selectedRequest.fechaCreacion).toLocaleDateString('es-ES') : ''}`,
+      `Documento generado el ${selectedRequest.fechaCreacion ? new Date(selectedRequest.fechaCreacion).toLocaleDateString("es-ES") : ""}`,
       margin,
-      pageHeight - 20
+      pageHeight - 20,
     )
     doc.text(
-      `Última actualización: ${selectedRequest.fechaActualizacion ? new Date(selectedRequest.fechaActualizacion).toLocaleDateString('es-ES') : ''}`,
+      `Última actualización: ${selectedRequest.fechaActualizacion ? new Date(selectedRequest.fechaActualizacion).toLocaleDateString("es-ES") : ""}`,
       margin,
-      pageHeight - 14
+      pageHeight - 14,
     )
 
-    doc.save(`${selectedRequest.numero || 'documento'}.pdf`)
+    doc.save(`${selectedRequest.numero || "documento"}.pdf`)
   }
 
   const handleReject = () => {
@@ -119,7 +120,6 @@ export default function ValidadorTareaPage() {
     })
 
     toast.error("Documento rechazado. El documento ha sido rechazado y enviado como vista previa al elaborador")
-
     resetForm()
   }
 
@@ -139,13 +139,13 @@ export default function ValidadorTareaPage() {
       },
     })
 
-    // Cuando el validador aprueba, el documento regresa al elaborador (status 'pendiente')
+    // Cuando el validador aprueba, el documento va al elaborador
     dispatch({
       type: "UPDATE_REQUEST",
       payload: {
         id: selectedRequest.id,
         updates: {
-          status: "pendiente", // Vuelve al elaborador
+          status: "pendiente", // Va al elaborador
         },
       },
     })
@@ -158,12 +158,44 @@ export default function ValidadorTareaPage() {
           accion: "enviado_revision",
           usuario: "Sistema",
           fecha: new Date().toISOString(),
-          detalles: "Validación completada por el validador - enviado al elaborador para revisión final",
+          detalles: "Validación completada - enviado al elaborador para revisión final",
         },
       },
     })
 
     toast.success("Validación completada. Documento enviado al elaborador para revisión final")
+    resetForm()
+  }
+
+  const handleDelegate = () => {
+    if (!selectedRequest || !state.user) return
+
+    dispatch({
+      type: "UPDATE_REQUEST",
+      payload: {
+        id: selectedRequest.id,
+        updates: {
+          status: "pendiente", // Vuelve a pendiente para que aparezca en solicitudes
+        },
+      },
+    })
+
+    dispatch({
+      type: "ADD_HISTORY",
+      payload: {
+        requestId: selectedRequest.id,
+        entry: {
+          accion: "enviado_revision",
+          usuario: state.user.name,
+          fecha: new Date().toISOString(),
+          detalles: "Tarea delegada - devuelta a solicitudes pendientes",
+        },
+      },
+    })
+
+    toast.success("Tarea delegada", {
+      description: "La tarea ha sido devuelta a solicitudes pendientes",
+    })
     resetForm()
   }
 
@@ -176,13 +208,7 @@ export default function ValidadorTareaPage() {
     <div className="container mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold text-gray-900">Tareas de Validación</h1>
 
-
-      <RequestsTable
-        data={validationTasks}
-        onReview={setSelectedRequest}
-        showActions={true}
-        isHistorial={false}
-      />
+      <RequestsTable data={validationTasks} onReview={setSelectedRequest} showActions={true} isHistorial={false} />
 
       {selectedRequest && (
         <Drawer open={!!selectedRequest} onOpenChange={resetForm}>
@@ -200,11 +226,17 @@ export default function ValidadorTareaPage() {
                       <span className="opacity-90">Documento:</span>
                       <span className="ml-2 font-semibold">{selectedRequest.numero}</span>
                     </div>
+                    <div className="mt-2">
+                      <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        Solo Lectura - Validación Técnica
+                      </div>
+                    </div>
                   </div>
                 )}
               </DrawerHeader>
-              <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-8">
-                <div className="flex flex-col gap-8">
+
+              <div className="flex-1 min-h-0 overflow-y-auto">
+                <div className="p-4 sm:p-8 flex flex-col gap-8">
                   <Tabs defaultValue="documento" className="w-full">
                     <TabsList className="grid w-full grid-cols-2 h-12 bg-gray-100 rounded-lg p-1">
                       <TabsTrigger
@@ -222,20 +254,33 @@ export default function ValidadorTareaPage() {
                         <span>Comentarios</span>
                       </TabsTrigger>
                     </TabsList>
+
                     <TabsContent value="documento" className="space-y-6 mt-6">
                       <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                         <div className="space-y-6">
                           <div className="border-l-4 border-[#00363B] pl-4">
                             <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">OBJETIVO</h4>
-                            <p className="text-gray-700 leading-relaxed">{selectedRequest.objetivo || "No especificado"}</p>
+                            <div className="bg-gray-100 rounded-lg p-4 min-h-[100px]">
+                              <p className="text-gray-700 leading-relaxed">
+                                {selectedRequest.objetivo || "No especificado"}
+                              </p>
+                            </div>
                           </div>
                           <div className="border-l-4 border-[#00363B] pl-4">
                             <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">ALCANCE</h4>
-                            <p className="text-gray-700 leading-relaxed">{selectedRequest.alcance || "No especificado"}</p>
+                            <div className="bg-gray-100 rounded-lg p-4 min-h-[100px]">
+                              <p className="text-gray-700 leading-relaxed">
+                                {selectedRequest.alcance || "No especificado"}
+                              </p>
+                            </div>
                           </div>
                           <div className="border-l-4 border-[#00363B] pl-4">
                             <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">DESARROLLO</h4>
-                            <p className="text-gray-700 leading-relaxed">{selectedRequest.desarrollo || "No especificado"}</p>
+                            <div className="bg-gray-100 rounded-lg p-4 min-h-[200px]">
+                              <p className="text-gray-700 leading-relaxed">
+                                {selectedRequest.desarrollo || "No especificado"}
+                              </p>
+                            </div>
                           </div>
                         </div>
                         <div className="flex justify-end mt-6 pt-4 border-t border-gray-100">
@@ -250,6 +295,7 @@ export default function ValidadorTareaPage() {
                         </div>
                       </div>
                     </TabsContent>
+
                     <TabsContent value="comentarios" className="space-y-6 mt-6">
                       <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                         <div className="space-y-4">
@@ -276,16 +322,27 @@ export default function ValidadorTareaPage() {
                     </TabsContent>
                   </Tabs>
                 </div>
-                <div className="h-8 sm:h-0 pointer-events-none select-none" aria-hidden="true"></div>
+                <div style={{ marginBottom: 128 }}></div>
               </div>
+
               <div className="border-t border-gray-200 bg-gray-50/50 px-4 py-3 sticky bottom-0 left-0 right-0 z-20">
                 <div className="flex justify-between items-center">
                   <DrawerClose asChild>
-                    <Button variant="outline" className="px-6 border-gray-300 text-gray-700 hover:bg-gray-50">
+                    <Button
+                      variant="outline"
+                      className="px-6 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
+                    >
                       Cancelar
                     </Button>
                   </DrawerClose>
                   <div className="flex space-x-3">
+                    <Button
+                      onClick={handleDelegate}
+                      variant="outline"
+                      className="px-6 border-orange-300 text-orange-700 hover:bg-orange-50 bg-transparent"
+                    >
+                      Delegar
+                    </Button>
                     <Button onClick={handleReject} variant="destructive" className="px-6">
                       Rechazar
                     </Button>

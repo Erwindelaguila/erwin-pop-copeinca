@@ -3,11 +3,11 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useAppContext } from "@/lib/store"
-import type { UserRole } from "@/lib/types"
+import { Button } from "../components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select"
+import { useAppContext, PROFESSIONAL_USERS } from "../lib/store"
+import type { UserRole } from "../lib/types"
 
 export default function HomePage() {
   const [selectedRole, setSelectedRole] = useState<UserRole | "">("")
@@ -15,45 +15,44 @@ export default function HomePage() {
   const { dispatch } = useAppContext()
   const router = useRouter()
 
-  const getValidatorOptions = () => [
-    { id: "1", name: "Erwin del Aguila" },
-    { id: "2", name: "Ivan Sanchez" },
-  ]
+  const getUserOptionsForRole = (role: UserRole) => {
+    switch (role) {
+      case "elaborador":
+        return [{ id: PROFESSIONAL_USERS.elaborador.id, name: PROFESSIONAL_USERS.elaborador.name }]
+      case "revisor":
+        return [{ id: PROFESSIONAL_USERS.revisor.id, name: PROFESSIONAL_USERS.revisor.name }]
+      case "aprobador":
+        return [{ id: PROFESSIONAL_USERS.aprobador.id, name: PROFESSIONAL_USERS.aprobador.name }]
+      case "validador":
+        return [
+          { id: PROFESSIONAL_USERS.validador1.id, name: PROFESSIONAL_USERS.validador1.name },
+          { id: PROFESSIONAL_USERS.validador2.id, name: PROFESSIONAL_USERS.validador2.name },
+        ]
+      default:
+        return []
+    }
+  }
 
   const handleLogin = () => {
-    if (!selectedRole) return
+    if (!selectedRole || !selectedUser) return
 
-    // Solo validar usuario seleccionado si es validador
-    if (selectedRole === "validador" && !selectedUser) return
+    const userOptions = getUserOptionsForRole(selectedRole)
+    const selectedUserData = userOptions.find((u) => u.id === selectedUser)
 
-    let user
-    if (selectedRole === "validador") {
-      const validatorData = getValidatorOptions().find((u) => u.id === selectedUser)
-      if (!validatorData) return
-      user = {
-        id: selectedUser,
-        name: validatorData.name,
-        role: selectedRole,
-      }
-    } else {
-      // Para otros roles, usar IDs fijos
-      const roleUsers = {
-        elaborador: { id: "1", name: "Juan Pérez" },
-        revisor: { id: "2", name: "María García" },
-        aprobador: { id: "3", name: "Carlos López" },
-      }
-      user = {
-        ...roleUsers[selectedRole as keyof typeof roleUsers],
-        role: selectedRole,
-      }
+    if (!selectedUserData) return
+
+    const user = {
+      id: selectedUser,
+      name: selectedUserData.name,
+      role: selectedRole,
     }
 
     dispatch({ type: "SET_USER", payload: user })
     router.push(`/${selectedRole}`)
   }
 
-  const validatorOptions = getValidatorOptions()
-  const needsUserSelection = selectedRole === "validador"
+  const userOptions = selectedRole ? getUserOptionsForRole(selectedRole) : []
+  const needsUserSelection = selectedRole !== ""
 
   return (
     <div className="min-h-screen bg-[#00363B] flex items-center justify-center p-4">
@@ -71,7 +70,7 @@ export default function HomePage() {
               value={selectedRole}
               onValueChange={(value: UserRole) => {
                 setSelectedRole(value)
-                setSelectedUser("") // Reset user selection when role changes
+                setSelectedUser("") 
               }}
             >
               <SelectTrigger className="w-full">
@@ -90,10 +89,10 @@ export default function HomePage() {
             <div>
               <Select value={selectedUser} onValueChange={setSelectedUser}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccione el usuario validador" />
+                  <SelectValue placeholder={`Seleccione el usuario ${selectedRole}`} />
                 </SelectTrigger>
                 <SelectContent>
-                  {validatorOptions.map((user) => (
+                  {userOptions.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.name}
                     </SelectItem>
@@ -105,7 +104,7 @@ export default function HomePage() {
 
           <Button
             onClick={handleLogin}
-            disabled={!selectedRole || (needsUserSelection && !selectedUser)}
+            disabled={!selectedRole || !selectedUser}
             className="w-full bg-[#00363B] hover:bg-[#00363B]/90 text-white"
           >
             Ingresar al Sistema

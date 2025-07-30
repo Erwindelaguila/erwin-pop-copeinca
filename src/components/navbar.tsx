@@ -4,8 +4,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import { LogOut } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useAppContext } from "@/lib/store"
+import { Button } from "./ui/button"
+import { useAppContext } from "../lib/store"
 
 export function Navbar() {
   const { state, dispatch } = useAppContext()
