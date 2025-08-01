@@ -179,7 +179,7 @@ export default function AprobadorPreviaPage() {
             </CardContent>
           </Card>
 
-          {/* Validadores asignados si existen */}
+   
           {document.validadores && document.validadores.length > 0 && (
             <Card>
               <CardHeader>

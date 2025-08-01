@@ -169,7 +169,7 @@ export default function RevisorPreviaPage() {
               </CardContent>
             </Card>
 
-            {/* Alcance */}
+    
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center text-lg">

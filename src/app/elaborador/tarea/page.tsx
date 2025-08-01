@@ -295,9 +295,7 @@ export default function ElaboradorTareaPage() {
                   </div>
                   {isReadOnly(selectedRequest) && (
                     <div className="mt-2">
-                      <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                        Solo Lectura - Enviando al Aprobador
-                      </div>
+             
                     </div>
                   )}
                 </div>
@@ -418,13 +416,15 @@ export default function ElaboradorTareaPage() {
                   </Button>
                 </DrawerClose>
                 <div className="flex space-x-3">
-                  <Button
-                    onClick={handleLiberate}
-                    variant="outline"
-                    className="px-6 border-orange-300 text-orange-700 hover:bg-orange-50 bg-transparent"
-                  >
-                    Liberar
-                  </Button>
+                  {selectedRequest && isRevision(selectedRequest) && (
+                    <Button
+                      onClick={handleLiberate}
+                      variant="outline"
+                      className="px-6 border-orange-300 text-orange-700 hover:bg-orange-50 bg-transparent"
+                    >
+                      Liberar
+                    </Button>
+                  )}
                   <Button
                     onClick={handleSave}
                     className="bg-green-600 hover:bg-green-700 text-white px-6 shadow-sm"

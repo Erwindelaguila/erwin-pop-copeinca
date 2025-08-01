@@ -1,4 +1,5 @@
 "use client"
+
 import jsPDF from "jspdf"
 import type { DocumentRequest } from "../../../lib/types"
 import { useState } from "react"
@@ -17,8 +18,8 @@ export default function ValidadorTareaPage() {
   const [selectedRequest, setSelectedRequest] = useState<DocumentRequest | null>(null)
   const [comments, setComments] = useState("")
 
-
   const currentUserId = state.user?.id
+
   const validationTasks = state.requests.filter(
     (req) =>
       req.status === "en_validacion" &&
@@ -26,9 +27,18 @@ export default function ValidadorTareaPage() {
       !req.historial.some((h) => h.usuario === state.user?.name && h.accion === "validacion_aprobada"),
   )
 
+  // Cuando se selecciona una solicitud, cargar comentarios existentes
+  const handleOpenRequest = (request: DocumentRequest) => {
+    setSelectedRequest(request)
+    // Buscar comentarios previos del validador en el historial
+    const validatorComment =
+      request.historial.filter((h) => h.usuario === state.user?.name && h.accion === "documento_creado").pop()
+        ?.detalles || ""
+    setComments(validatorComment)
+  }
+
   const handleViewPDF = () => {
     if (!selectedRequest) return
-
 
     const doc = new jsPDF()
     const margin = 15
@@ -100,7 +110,7 @@ export default function ValidadorTareaPage() {
       payload: {
         id: selectedRequest.id,
         updates: {
-          status: "pendiente", 
+          status: "pendiente",
         },
       },
     })
@@ -138,13 +148,12 @@ export default function ValidadorTareaPage() {
       },
     })
 
-  
     dispatch({
       type: "UPDATE_REQUEST",
       payload: {
         id: selectedRequest.id,
         updates: {
-          status: "pendiente", 
+          status: "pendiente",
         },
       },
     })
@@ -166,6 +175,28 @@ export default function ValidadorTareaPage() {
     resetForm()
   }
 
+  const handleSave = () => {
+    if (!selectedRequest || !state.user) return
+
+
+    setSelectedRequest((prev: DocumentRequest | null) => (prev ? { ...prev, comentariosValidador: comments } : prev))
+
+    dispatch({
+      type: "ADD_HISTORY",
+      payload: {
+        requestId: selectedRequest.id,
+        entry: {
+          accion: "documento_creado",
+          usuario: state.user.name,
+          fecha: new Date().toISOString(),
+          detalles: comments || "Comentarios de validación guardados temporalmente",
+        },
+      },
+    })
+
+    toast.success("Cambios guardados. Los comentarios han sido guardados temporalmente")
+  }
+
   const handleDelegate = () => {
     if (!selectedRequest || !state.user) return
 
@@ -175,6 +206,7 @@ export default function ValidadorTareaPage() {
         id: selectedRequest.id,
         updates: {
           status: "pendiente", 
+          liberadoDeTarea: true, 
         },
       },
     })
@@ -187,13 +219,13 @@ export default function ValidadorTareaPage() {
           accion: "enviado_revision",
           usuario: state.user.name,
           fecha: new Date().toISOString(),
-          detalles: "Tarea delegada - devuelta a solicitudes pendientes",
+          detalles: "Tarea liberada - cambios guardados y devuelta a solicitudes pendientes",
         },
       },
     })
 
-    toast.success("Tarea delegada", {
-      description: "La tarea ha sido devuelta a solicitudes pendientes",
+    toast.success("Tarea liberada", {
+      description: "Los cambios han sido guardados y la tarea devuelta a solicitudes pendientes",
     })
     resetForm()
   }
@@ -207,7 +239,7 @@ export default function ValidadorTareaPage() {
     <div className="container mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold text-gray-900">Tareas de Validación</h1>
 
-      <RequestsTable data={validationTasks} onReview={setSelectedRequest} showActions={true} isHistorial={false} />
+      <RequestsTable data={validationTasks} onReview={handleOpenRequest} showActions={true} isHistorial={false} />
 
       {selectedRequest && (
         <Drawer open={!!selectedRequest} onOpenChange={resetForm}>
@@ -265,6 +297,7 @@ export default function ValidadorTareaPage() {
                               </p>
                             </div>
                           </div>
+
                           <div className="border-l-4 border-[#00363B] pl-4">
                             <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">ALCANCE</h4>
                             <div className="bg-gray-100 rounded-lg p-4 min-h-[100px]">
@@ -273,6 +306,7 @@ export default function ValidadorTareaPage() {
                               </p>
                             </div>
                           </div>
+
                           <div className="border-l-4 border-[#00363B] pl-4">
                             <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">DESARROLLO</h4>
                             <div className="bg-gray-100 rounded-lg p-4 min-h-[200px]">
@@ -282,6 +316,7 @@ export default function ValidadorTareaPage() {
                             </div>
                           </div>
                         </div>
+
                         <div className="flex justify-end mt-6 pt-4 border-t border-gray-100">
                           <Button
                             variant="outline"
@@ -304,6 +339,7 @@ export default function ValidadorTareaPage() {
                               <p className="text-gray-800">{selectedRequest.comentariosRevisor}</p>
                             </div>
                           )}
+
                           <div className="space-y-2">
                             <Label className="text-sm font-semibold text-gray-800 uppercase tracking-wide">
                               Sus Comentarios de Validación
@@ -334,6 +370,7 @@ export default function ValidadorTareaPage() {
                       Cancelar
                     </Button>
                   </DrawerClose>
+
                   <div className="flex space-x-3">
                     <Button
                       onClick={handleDelegate}
@@ -342,9 +379,15 @@ export default function ValidadorTareaPage() {
                     >
                       Liberar
                     </Button>
+
                     <Button onClick={handleReject} variant="destructive" className="px-6">
                       No Conforme
                     </Button>
+
+                    <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700 px-6 text-white">
+                      Guardar
+                    </Button>
+
                     <Button onClick={handleApprove} className="bg-[#00363B] hover:bg-[#00363B]/90 px-6 text-white">
                       Conforme
                     </Button>

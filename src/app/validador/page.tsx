@@ -16,23 +16,28 @@ export default function ValidadorPage() {
   const router = useRouter()
 
   const currentUserId = state.user?.id
-  const allRequests = state.requests.filter(
-    (req) => req.status === "pendiente" && req.validadores?.includes(currentUserId || ""),
-  )
+
+
+  const allRequests = state.requests.filter((req) => {
+    const isPendiente = req.status === "pendiente"
+    const hasValidators = req.validadores?.includes(currentUserId || "")
+    const hasValidationHistory = req.historial.some((h) => h.accion === "enviado_validacion")
+    return isPendiente && hasValidators && hasValidationHistory
+  })
+
+  const pendienteRequests = allRequests.filter((req) => {
+    const hasBeenProcessedByThisValidator = req.historial.some(
+      (h) => h.usuario === state.user?.name && (h.accion === "validacion_aprobada" || h.accion === "rechazado"),
+    )
+    return !hasBeenProcessedByThisValidator
+  })
+
   const historialRequests = state.requests.filter((req) =>
     req.historial.some(
       (h) =>
         h.usuario === state.user?.name &&
         (h.accion === "validacion_aprobada" || h.accion === "rechazado" || h.accion === "enviado_revision"),
     ),
-  )
-  const pendienteRequests = allRequests.filter(
-    (req) =>
-      !req.historial.some(
-        (h) =>
-          h.usuario === state.user?.name &&
-          (h.accion === "validacion_aprobada" || h.accion === "rechazado" || h.accion === "enviado_revision"),
-      ),
   )
 
   const displayedRequests = activeTab === "historial" ? historialRequests : pendienteRequests

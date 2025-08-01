@@ -98,7 +98,7 @@ export default function TimelinePage() {
     }
 
   
-    // let currentStage = "elaboracion" // removed unused variable
+    
 
 
     const hasRevisionActions = historial.some(

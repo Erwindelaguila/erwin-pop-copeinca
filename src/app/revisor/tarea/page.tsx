@@ -1,6 +1,6 @@
-
 "use client"
 import type { DocumentRequest } from "../../../lib/types"
+
 
 import { useState } from "react"
 import { Button } from "../../../components/ui/button"
@@ -23,14 +23,14 @@ export default function RevisorTareaPage() {
   const [comments, setComments] = useState("")
   const [selectedValidators, setSelectedValidators] = useState<string[]>([])
 
-  // Cuando se selecciona una solicitud, cargar comentarios y validadores existentes
+
   const handleOpenRequest = (request: DocumentRequest) => {
     setSelectedRequest(request)
     setComments(request.comentariosRevisor || "")
     setSelectedValidators(request.validadores || [])
   }
 
-  // Documentos en tareas del revisor
+
   const documentTasks = state.requests.filter((req) => req.status === "en_validacion")
 
   const handleAddValidator = (validatorId: string) => {
@@ -519,7 +519,7 @@ export default function RevisorTareaPage() {
                       Guardar
                     </Button>
                     <Button onClick={handleApprove} className="bg-[#00363B] hover:bg-[#00363B]/90 px-6 text-white">
-                      Aceptar
+                      Aprobar
                     </Button>
                   </div>
                 </div>

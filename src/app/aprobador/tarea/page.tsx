@@ -265,9 +265,7 @@ export default function AprobadorTareaPage() {
                       <span className="ml-2 font-semibold">{selectedRequest.numero}</span>
                     </div>
                     <div className="mt-2">
-                      <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                        Solo Lectura - Aprobación Final
-                      </div>
+                     
                     </div>
                   </div>
                 )}

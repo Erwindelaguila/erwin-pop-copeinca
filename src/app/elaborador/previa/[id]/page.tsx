@@ -27,13 +27,13 @@ export default function ElaboradorPreviaPage() {
   const handleReservar = () => {
     if (!document || !state.user) return
 
-    // Mover documento a tareas del elaborador
+   
     dispatch({
       type: "UPDATE_REQUEST",
       payload: {
         id: document.id,
         updates: {
-          status: "en_desarrollo", // Va a tareas del elaborador
+          status: "en_desarrollo", 
         },
       },
     })
@@ -117,10 +117,10 @@ export default function ElaboradorPreviaPage() {
         </div>
       </div>
 
-      {/* Contenido principal */}
+      
       <div className="container mx-auto px-6 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
-          {/* Información del documento */}
+   
           <Card className="border-l-4 border-l-[#00363B]">
             <CardHeader className="bg-gradient-to-r from-[#00363B] to-[#004d54] text-white">
               <div className="flex items-center justify-between">
