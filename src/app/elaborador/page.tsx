@@ -261,7 +261,7 @@ export default function ElaboradorPage() {
         <h1 className="text-3xl font-bold text-gray-900">Solicitudes</h1>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-[#00363B] hover:bg-[#00363B]/90">
+            <Button className="bg-blue-800 hover:bg-blue-900">
               <Plus className="h-4 w-4 mr-2" />
               Crear Solicitud
             </Button>
@@ -292,7 +292,7 @@ export default function ElaboradorPage() {
                 <Button
                   onClick={handleCreateRequest}
                   disabled={!selectedType}
-                  className="bg-[#00363B] hover:bg-[#00363B]/90"
+                  className="bg-blue-800 hover:bg-blue-900"
                 >
                   Crear Solicitud
                 </Button>
@@ -321,7 +321,7 @@ export default function ElaboradorPage() {
                   return (
                     <Button
                       size="sm"
-                      className="bg-[#00363B] hover:bg-[#00363B]/90"
+                      className="bg-blue-800 hover:bg-blue-900"
                       onClick={() => setSelectedRequest(request)}
                     >
                       Revisar
@@ -336,7 +336,7 @@ export default function ElaboradorPage() {
                     return (
                       <Button
                         size="sm"
-                        className="bg-[#00363B] hover:bg-[#00363B]/90"
+                        className="bg-blue-800 hover:bg-blue-900"
                         onClick={() => handleVisualizarPrevia(request)}
                       >
                         <Eye className="h-4 w-4 mr-2" />
@@ -349,7 +349,7 @@ export default function ElaboradorPage() {
                       <div className="flex gap-2">
                         <Button
                           size="sm"
-                          className="bg-[#00363B] hover:bg-[#00363B]/90"
+                          className="bg-blue-800 hover:bg-blue-900"
                           onClick={() => handleAcceptChangeDirect(request)}
                         >
                           Aceptar
@@ -418,7 +418,7 @@ export default function ElaboradorPage() {
                     <XCircle className="h-4 w-4 mr-2" />
                     Rechazar
                   </Button>
-                  <Button onClick={handleAcceptChange} className="bg-[#00363B] hover:bg-[#00363B]/90 px-6">
+                  <Button onClick={handleAcceptChange} className="bg-blue-800 hover:bg-blue-900 px-6">
                     <CheckCircle className="h-4 w-4 mr-2" />
                     Aceptar
                   </Button>

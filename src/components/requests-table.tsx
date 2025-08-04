@@ -102,14 +102,14 @@ export function RequestsTable({
               placeholder="Buscar solicitud..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 border-gray-200 focus:border-[#00363B] focus:ring-[#00363B]/20"
+              className="pl-10 border-gray-200 focus:border-blue-800 focus:ring-blue-900/20"
             />
           </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gradient-to-r from-[#00363B] to-[#004d54] text-white">
+            <thead className="bg-gradient-to-r from-blue-800 to-blue-900 text-white">
               <tr>
                 <th className="text-left py-4 px-6 font-semibold text-sm tracking-wide">#</th>
                 <th className="text-left py-4 px-6 font-semibold text-sm tracking-wide">N° SOLICITUD</th>
@@ -136,10 +136,10 @@ export function RequestsTable({
                   }`}
                 >
                   <td className="py-4 px-6 text-sm font-semibold text-gray-900">{startIndex + index + 1}</td>
-                  <td className="py-4 px-6 font-mono text-sm font-medium text-[#00363B]">{item.numero}</td>
+                  <td className="py-4 px-6 font-mono text-sm font-medium text-blue-800">{item.numero}</td>
                   <td className="py-4 px-6">
                     <div className="flex items-center">
-                      <div className="w-2 h-2 bg-[#00363B] rounded-full mr-3"></div>
+                      <div className="w-2 h-2 bg-blue-800 rounded-full mr-3"></div>
                       <span className="font-medium text-gray-900 text-sm">{getTypeLabel(item.tipo)}</span>
                     </div>
                   </td>
@@ -162,7 +162,7 @@ export function RequestsTable({
                         size="sm"
                         variant="ghost"
                         onClick={() => handleViewTimeline(item)}
-                        className="text-[#00363B] hover:text-white hover:bg-[#00363B] transition-all duration-200 font-medium text-sm"
+                        className="text-blue-800 hover:text-white hover:bg-blue-900 transition-all duration-200 font-medium text-sm"
                         title="Ver seguimiento del proceso"
                       >
                         <History className="h-4 w-4 mr-1" />
@@ -178,7 +178,7 @@ export function RequestsTable({
                             <Button
                               size="sm"
                               onClick={() => onReview(item)}
-                              className="bg-[#00363B] hover:bg-[#004d54] text-white font-medium transition-all duration-200 text-sm"
+                              className="bg-blue-800 hover:bg-blue-900 text-white font-medium transition-all duration-200 text-sm"
                             >
                               {item.status === "documento_enviado" && <Eye className="h-4 w-4 mr-2" />}
                               {getButtonText(item)}
@@ -224,7 +224,7 @@ export function RequestsTable({
                 size="sm"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="border-gray-200 hover:bg-[#00363B] hover:text-white hover:border-[#00363B] text-sm"
+                className="border-gray-200 hover:bg-blue-800 hover:text-white hover:border-blue-800 text-sm"
               >
                 Anterior
               </Button>
@@ -236,7 +236,7 @@ export function RequestsTable({
                 size="sm"
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="border-gray-200 hover:bg-[#00363B] hover:text-white hover:border-[#00363B] text-sm"
+                className="border-gray-200 bg-indigo-900 text-white hover:bg-indigo-800 hover:border-indigo-900 text-sm"
               >
                 Siguiente
               </Button>

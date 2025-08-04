@@ -194,7 +194,7 @@ export default function RevisorPage() {
               <DialogTitle className="text-xl font-semibold">Validar Tipo de Documento</DialogTitle>
             </DialogHeader>
 
-            <div className="bg-gradient-to-r from-[#00363B] to-[#004d54] text-white p-4 rounded-lg text-center mb-2">
+            <div className="bg-gradient-to-r from-[#1e40af] to-[#1a237e] text-white p-4 rounded-lg text-center mb-2">
               <p className="text-lg font-medium">{selectedRequest.numero}</p>
               <p className="text-sm opacity-90 mt-1">El elaborador creó una nueva solicitud</p>
             </div>
@@ -225,8 +225,8 @@ export default function RevisorPage() {
                     <XCircle className="h-4 w-4 mr-2" />
                     Rechazar
                   </Button>
-                  <Button onClick={handleApproveType} className="bg-[#00363B] hover:bg-[#00363B]/90 px-6">
-                    <CheckCircle className="h-4 w-4 mr-2" />
+                  <Button onClick={handleApproveType} className="bg-[#1e40af] hover:bg-[#1a237e] px-6">
+                    <CheckCircle className="h-4 w-4 mr-2 text-white" />
                     {selectedType !== selectedRequest.tipo ? "Cambiar y Aprobar" : "Aprobar"}
                   </Button>
                 </div>

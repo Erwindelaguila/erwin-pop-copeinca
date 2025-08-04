@@ -17,7 +17,7 @@ export function StatusTabs({ activeTab, onTabChange, historialCount, pendienteCo
         onClick={() => onTabChange("historial")}
         className={`px-4 py-2 rounded-md font-medium ${
           activeTab === "historial"
-            ? "bg-[#00363B] text-white hover:bg-[#00363B]/90"
+            ? "bg-blue-600 text-white hover:bg-blue-700"
             : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
         }`}
       >
@@ -29,7 +29,7 @@ export function StatusTabs({ activeTab, onTabChange, historialCount, pendienteCo
         onClick={() => onTabChange("pendiente")}
         className={`px-4 py-2 rounded-md font-medium ${
           activeTab === "pendiente"
-            ? "bg-[#00363B] text-white hover:bg-[#00363B]/90"
+            ? "bg-blue-600 text-white hover:bg-blue-700"
             : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
         }`}
       >

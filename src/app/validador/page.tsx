@@ -66,7 +66,7 @@ export default function ValidadorPage() {
             ? (request) => (
                 <Button
                   size="sm"
-                  className="bg-[#00363B] hover:bg-[#00363B]/90 text-white text-sm"
+                  className="bg-[#1e40af] hover:bg-[#1a237e] text-white text-sm"
                   onClick={() => handleVisualizarPrevia(request)}
                 >
                   <Eye className="h-4 w-4 mr-2" />

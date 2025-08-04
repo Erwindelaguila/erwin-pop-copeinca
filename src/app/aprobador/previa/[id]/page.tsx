@@ -52,9 +52,24 @@ export default function AprobadorPreviaPage() {
     })
 
     toast.success("Documento reservado", {
-      description: "El documento ha sido enviado a sus tareas para aprobación final",
+      description: "El documento ha been enviado a sus tareas para aprobación final",
     })
     router.push("/aprobador")
+  }
+
+  if (!document) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Documento no encontrado</h2>
+          <p className="text-gray-600 mb-4">El documento que buscas no existe o no tienes permisos para verlo.</p>
+          <Button onClick={() => router.push("/aprobador")} className="bg-[#1e40af] hover:bg-[#1a237e]">
+            Volver a Solicitudes
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   if (!document) {
@@ -129,12 +144,12 @@ export default function AprobadorPreviaPage() {
               </Button>
               <div className="h-6 w-px bg-gray-300"></div>
               <div className="flex items-center space-x-3">
-                <Eye className="h-5 w-5 text-[#00363B]" />
+                <Eye className="h-5 w-5 text-[#1e40af]" />
                 <h1 className="text-xl font-semibold text-gray-900">Vista Previa - Aprobación Final</h1>
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <Button onClick={handleReservar} className="bg-[#00363B] hover:bg-[#00363B]/90 text-white">
+              <Button onClick={handleReservar} className="bg-[#1e40af] hover:bg-[#1a237e] text-white">
                 Reservar
               </Button>
             </div>
@@ -146,8 +161,8 @@ export default function AprobadorPreviaPage() {
       <div className="container mx-auto px-6 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
     
-          <Card className="border-l-4 border-l-[#00363B]">
-            <CardHeader className="bg-gradient-to-r from-[#00363B] to-[#004d54] text-white">
+          <Card className="border-l-4 border-l-[#1e40af]">
+            <CardHeader className="bg-gradient-to-r from-[#1e40af] to-[#1a237e] text-white">
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-2xl font-bold">{document.numero}</CardTitle>
@@ -184,7 +199,7 @@ export default function AprobadorPreviaPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center text-lg">
-                  <Users className="h-5 w-5 mr-2 text-[#00363B]" />
+                  <Users className="h-5 w-5 mr-2 text-[#1e40af]" />
                   Validadores que Participaron
                 </CardTitle>
               </CardHeader>
@@ -194,9 +209,9 @@ export default function AprobadorPreviaPage() {
                     const validator =
                       validatorId === "4" ? PROFESSIONAL_USERS.validador1 : PROFESSIONAL_USERS.validador2
                     return (
-                      <div key={validatorId} className="bg-green-50 rounded-lg p-4 border border-green-200">
-                        <p className="font-medium text-green-900">{validator.name}</p>
-                        <p className="text-sm text-green-700">Validador Técnico</p>
+                      <div key={validatorId} className="bg-[#e3e7fa] rounded-lg p-4 border border-[#bfc8e6]">
+                        <p className="font-medium text-[#1e40af]">{validator.name}</p>
+                        <p className="text-sm text-[#1a237e]">Validador Técnico</p>
                       </div>
                     )
                   })}
@@ -211,7 +226,7 @@ export default function AprobadorPreviaPage() {
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center text-lg">
-                  <div className="w-1 h-6 bg-[#00363B] rounded mr-3"></div>
+                  <div className="w-1 h-6 bg-[#1e40af] rounded mr-3"></div>
                   OBJETIVO
                 </CardTitle>
               </CardHeader>
@@ -228,7 +243,7 @@ export default function AprobadorPreviaPage() {
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center text-lg">
-                  <div className="w-1 h-6 bg-[#00363B] rounded mr-3"></div>
+                  <div className="w-1 h-6 bg-[#1e40af] rounded mr-3"></div>
                   ALCANCE
                 </CardTitle>
               </CardHeader>
@@ -245,7 +260,7 @@ export default function AprobadorPreviaPage() {
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center text-lg">
-                  <div className="w-1 h-6 bg-[#00363B] rounded mr-3"></div>
+                  <div className="w-1 h-6 bg-[#1e40af] rounded mr-3"></div>
                   DESARROLLO
                 </CardTitle>
               </CardHeader>
@@ -264,7 +279,7 @@ export default function AprobadorPreviaPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center text-lg">
-                  <MessageSquare className="h-5 w-5 mr-2 text-[#00363B]" />
+                  <MessageSquare className="h-5 w-5 mr-2 text-[#1e40af]" />
                   Comentarios del Proceso
                 </CardTitle>
               </CardHeader>
@@ -274,7 +289,7 @@ export default function AprobadorPreviaPage() {
                     <div
                       key={index}
                       className={`border rounded-lg p-4 ${
-                        comment.type === "revisor" ? "bg-blue-50 border-blue-200" : "bg-green-50 border-green-200"
+                        comment.type === "revisor" ? "bg-blue-50 border-blue-200" : "bg-[#e3e7fa] border-[#bfc8e6]"
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -300,7 +315,7 @@ export default function AprobadorPreviaPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center text-lg">
-                <FileText className="h-5 w-5 mr-2 text-[#00363B]" />
+                <FileText className="h-5 w-5 mr-2 text-[#1e40af]" />
                 Historial del Documento
               </CardTitle>
             </CardHeader>
@@ -311,7 +326,7 @@ export default function AprobadorPreviaPage() {
                     key={entry.id}
                     className="flex items-start space-x-3 pb-3 border-b border-gray-100 last:border-b-0"
                   >
-                    <div className="w-2 h-2 bg-[#00363B] rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-[#1e40af] rounded-full mt-2 flex-shrink-0"></div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-gray-900">{entry.usuario}</p>

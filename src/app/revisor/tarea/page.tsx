@@ -72,7 +72,7 @@ export default function RevisorTareaPage() {
 
 
     doc.setFontSize(18)
-    doc.setTextColor("#00363B")
+    doc.setTextColor("#1e40af")
     doc.text(`Documento: ${selectedRequest.numero}`, margin, y)
     y += 10
 
@@ -83,7 +83,7 @@ export default function RevisorTareaPage() {
 
     const printSection = (title: string, text: string) => {
       doc.setFontSize(12)
-      doc.setTextColor("#00363B")
+      doc.setTextColor("#1e40af")
       checkAddPage()
       doc.text(title, margin, y)
       y += lineHeight
@@ -302,7 +302,7 @@ export default function RevisorTareaPage() {
         customActions={(request) => (
           <Button
             size="sm"
-            className="bg-[#00363B] hover:bg-[#00363B]/90 text-sm"
+            className="bg-[#1e40af] hover:bg-[#1a237e] text-white text-sm"
             onClick={(e) => {
               e.stopPropagation()
               handleOpenRequest(request)
@@ -325,7 +325,7 @@ export default function RevisorTareaPage() {
                 </div>
                 {selectedRequest && (
                   <div className="mt-3">
-                    <div className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-[#00363B] text-white">
+                    <div className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-[#1e40af] text-white">
                       <span className="opacity-90">Documento:</span>
                       <span className="ml-2 font-semibold">{selectedRequest.numero}</span>
                     </div>
@@ -357,19 +357,19 @@ export default function RevisorTareaPage() {
                     <TabsContent value="documento" className="space-y-6 mt-6">
                       <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                         <div className="space-y-6">
-                          <div className="border-l-4 border-[#00363B] pl-4">
+                          <div className="border-l-4 border-[#1e40af] pl-4">
                             <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">OBJETIVO</h4>
                             <p className="text-gray-700 leading-relaxed">
                               {selectedRequest.objetivo || "No especificado"}
                             </p>
                           </div>
-                          <div className="border-l-4 border-[#00363B] pl-4">
+                          <div className="border-l-4 border-[#1e40af] pl-4">
                             <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">ALCANCE</h4>
                             <p className="text-gray-700 leading-relaxed">
                               {selectedRequest.alcance || "No especificado"}
                             </p>
                           </div>
-                          <div className="border-l-4 border-[#00363B] pl-4">
+                          <div className="border-l-4 border-[#1e40af] pl-4">
                             <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">DESARROLLO</h4>
                             <p className="text-gray-700 leading-relaxed">
                               {selectedRequest.desarrollo || "No especificado"}
@@ -390,7 +390,7 @@ export default function RevisorTareaPage() {
 
                       <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                         <div className="flex items-center space-x-2 mb-4">
-                          <MessageSquare className="h-5 w-5 text-[#00363B]" />
+                          <MessageSquare className="h-5 w-5 text-[#1e40af]" />
                           <Label className="text-sm font-semibold text-gray-800 uppercase tracking-wide">
                             Comentarios
                           </Label>
@@ -400,7 +400,7 @@ export default function RevisorTareaPage() {
                           onChange={(e) => setComments(e.target.value)}
                           placeholder="Agregar comentarios sobre la revisión..."
                           rows={4}
-                          className="bg-gray-50 border-gray-200 focus:border-[#00363B] focus:ring-[#00363B]"
+                          className="bg-gray-50 border-gray-200 focus:border-[#1e40af] focus:ring-[#1e40af]"
                         />
                       </div>
                     </TabsContent>
@@ -409,7 +409,7 @@ export default function RevisorTareaPage() {
                       <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                         <div className="space-y-6">
                           <div className="flex items-center space-x-2">
-                            <Users className="h-5 w-5 text-[#00363B]" />
+                            <Users className="h-5 w-5 text-[#1e40af]" />
                             <h3 className="text-lg font-semibold text-gray-800">Agregar Validador</h3>
                           </div>
 
@@ -439,7 +439,7 @@ export default function RevisorTareaPage() {
                                 <h4 className="font-medium mb-3">Validadores Agregados:</h4>
                                 <div className="bg-white border rounded-lg">
                                   <table className="w-full">
-                                    <thead className="bg-[#00363B] text-white">
+                                    <thead className="bg-[#1e40af] text-white">
                                       <tr>
                                         <th className="text-left py-3 px-4 text-sm font-medium">
                                           Nombre del Validador
@@ -462,7 +462,7 @@ export default function RevisorTareaPage() {
                                                 onCheckedChange={(checked) =>
                                                   handleValidatorToggle(validatorId, checked as boolean)
                                                 }
-                                                className="data-[state=checked]:bg-[#00363B] data-[state=checked]:border-[#00363B]"
+                                                className="data-[state=checked]:bg-[#1e40af] data-[state=checked]:border-[#1e40af]"
                                               />
                                             </td>
                                             <td className="py-3 px-4 text-center">
@@ -518,7 +518,7 @@ export default function RevisorTareaPage() {
                     <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700 px-6 text-white">
                       Guardar
                     </Button>
-                    <Button onClick={handleApprove} className="bg-[#00363B] hover:bg-[#00363B]/90 px-6 text-white">
+                    <Button onClick={handleApprove} className="bg-[#1e40af] hover:bg-[#1a237e] px-6 text-white">
                       Aprobar
                     </Button>
                   </div>

@@ -55,14 +55,12 @@ export default function HomePage() {
   const needsUserSelection = selectedRole !== ""
 
   return (
-    <div className="min-h-screen bg-[#00363B] flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-4">
-          <div className="flex justify-center">
-            <Image src="/logo-copeinca-write.png" alt="Copeinca" width={120} height={40} className="h-12 w-auto" />
-          </div>
-          <CardTitle className="text-2xl font-bold text-[#00363B]">Sistema de Gestión de Documentos</CardTitle>
-          <p className="text-[#4B5C6B]">Selecciona tu rol para acceder al sistema</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-xl">
+        <CardHeader className="text-center space-y-6">
+          {/* Logo o branding removido por solicitud del usuario */}
+          <CardTitle className="text-2xl font-bold text-blue-800">Sistema de Gestión de Documentos</CardTitle>
+          <p className="text-slate-600 text-lg">Selecciona tu rol para acceder al sistema</p>
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
@@ -105,7 +103,7 @@ export default function HomePage() {
           <Button
             onClick={handleLogin}
             disabled={!selectedRole || !selectedUser}
-            className="w-full bg-[#00363B] hover:bg-[#00363B]/90 text-white"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-semibold shadow-lg transition-all duration-200"
           >
             Ingresar al Sistema
           </Button>

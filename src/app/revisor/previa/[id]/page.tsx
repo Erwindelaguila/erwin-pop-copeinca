@@ -105,7 +105,7 @@ export default function RevisorPreviaPage() {
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <Button onClick={handleReservar} className="bg-[#00363B] hover:bg-[#00363B]/90 text-white">
+              <Button onClick={handleReservar} className="bg-[#1e40af] hover:bg-[#1a237e] text-white">
                 Reservar
               </Button>
             </div>
@@ -117,8 +117,8 @@ export default function RevisorPreviaPage() {
       <div className="container mx-auto px-6 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
   
-          <Card className="border-l-4 border-l-[#00363B]">
-            <CardHeader className="bg-gradient-to-r from-[#00363B] to-[#004d54] text-white">
+          <Card className="border-l-4 border-l-[#1e40af]">
+            <CardHeader className="bg-gradient-to-r from-[#1e40af] to-[#1a237e] text-white">
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-2xl font-bold">{document.numero}</CardTitle>
@@ -156,7 +156,7 @@ export default function RevisorPreviaPage() {
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center text-lg">
-                  <div className="w-1 h-6 bg-[#00363B] rounded mr-3"></div>
+                  <div className="w-1 h-6 bg-[#1e40af] rounded mr-3"></div>
                   OBJETIVO
                 </CardTitle>
               </CardHeader>
@@ -173,7 +173,7 @@ export default function RevisorPreviaPage() {
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center text-lg">
-                  <div className="w-1 h-6 bg-[#00363B] rounded mr-3"></div>
+                  <div className="w-1 h-6 bg-[#1e40af] rounded mr-3"></div>
                   ALCANCE
                 </CardTitle>
               </CardHeader>
@@ -189,7 +189,7 @@ export default function RevisorPreviaPage() {
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center text-lg">
-                  <div className="w-1 h-6 bg-[#00363B] rounded mr-3"></div>
+                  <div className="w-1 h-6 bg-[#1e40af] rounded mr-3"></div>
                   DESARROLLO
                 </CardTitle>
               </CardHeader>
@@ -206,7 +206,7 @@ export default function RevisorPreviaPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center text-lg">
-                <FileText className="h-5 w-5 mr-2 text-[#00363B]" />
+                <FileText className="h-5 w-5 mr-2 text-[#1e40af]" />
                 Historial del Documento
               </CardTitle>
             </CardHeader>
@@ -217,7 +217,7 @@ export default function RevisorPreviaPage() {
                     key={entry.id}
                     className="flex items-start space-x-3 pb-3 border-b border-gray-100 last:border-b-0"
                   >
-                    <div className="w-2 h-2 bg-[#00363B] rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-[#1e40af] rounded-full mt-2 flex-shrink-0"></div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-gray-900">{entry.usuario}</p>

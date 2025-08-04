@@ -253,7 +253,7 @@ export default function ValidadorTareaPage() {
                 </div>
                 {selectedRequest && (
                   <div className="mt-3">
-                    <div className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-[#00363B] text-white">
+                    <div className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-[#1e40af] text-white">
                       <span className="opacity-90">Documento:</span>
                       <span className="ml-2 font-semibold">{selectedRequest.numero}</span>
                     </div>
@@ -289,7 +289,7 @@ export default function ValidadorTareaPage() {
                     <TabsContent value="documento" className="space-y-6 mt-6">
                       <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                         <div className="space-y-6">
-                          <div className="border-l-4 border-[#00363B] pl-4">
+                          <div className="border-l-4 border-[#1e40af] pl-4">
                             <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">OBJETIVO</h4>
                             <div className="bg-gray-100 rounded-lg p-4 min-h-[100px]">
                               <p className="text-gray-700 leading-relaxed">
@@ -298,7 +298,7 @@ export default function ValidadorTareaPage() {
                             </div>
                           </div>
 
-                          <div className="border-l-4 border-[#00363B] pl-4">
+                          <div className="border-l-4 border-[#1e40af] pl-4">
                             <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">ALCANCE</h4>
                             <div className="bg-gray-100 rounded-lg p-4 min-h-[100px]">
                               <p className="text-gray-700 leading-relaxed">
@@ -307,7 +307,7 @@ export default function ValidadorTareaPage() {
                             </div>
                           </div>
 
-                          <div className="border-l-4 border-[#00363B] pl-4">
+                          <div className="border-l-4 border-[#1e40af] pl-4">
                             <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">DESARROLLO</h4>
                             <div className="bg-gray-100 rounded-lg p-4 min-h-[200px]">
                               <p className="text-gray-700 leading-relaxed">
@@ -349,7 +349,7 @@ export default function ValidadorTareaPage() {
                               onChange={(e) => setComments(e.target.value)}
                               placeholder="Agregar comentarios sobre la validación..."
                               rows={4}
-                              className="bg-gray-50 border-gray-200 focus:border-[#00363B] focus:ring-[#00363B]"
+                              className="bg-gray-50 border-gray-200 focus:border-[#1e40af] focus:ring-[#1e40af]"
                             />
                           </div>
                         </div>
@@ -388,7 +388,7 @@ export default function ValidadorTareaPage() {
                       Guardar
                     </Button>
 
-                    <Button onClick={handleApprove} className="bg-[#00363B] hover:bg-[#00363B]/90 px-6 text-white">
+                    <Button onClick={handleApprove} className="bg-[#1e40af] hover:bg-[#1a237e] px-6 text-white">
                       Conforme
                     </Button>
                   </div>

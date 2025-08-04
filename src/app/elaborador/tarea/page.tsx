@@ -269,7 +269,7 @@ export default function ElaboradorTareaPage() {
         customActions={(request) => (
           <Button
             size="sm"
-            className="bg-[#00363B] hover:bg-[#00363B]/90"
+            className="bg-[#1e40af] hover:bg-[#1a237e] text-white"
             onClick={() => handleCreateDocument(request)}
           >
             {isRevision(request) ? "Revisar Documento" : "Crear Documento"}
@@ -289,7 +289,7 @@ export default function ElaboradorTareaPage() {
               </div>
               {selectedRequest && (
                 <div className="mt-3">
-                  <div className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-[#00363B] text-white">
+                  <div className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-[#1e40af] text-white">
                     <span className="opacity-90">Documento:</span>
                     <span className="ml-2 font-semibold">{selectedRequest.numero}</span>
                   </div>
@@ -308,7 +308,7 @@ export default function ElaboradorTareaPage() {
                 {/* Objetivo */}
                 <div className="flex flex-col gap-2 flex-1">
                   <Label className="text-sm font-bold text-gray-800 uppercase tracking-wide flex items-center">
-                    <div className="w-1 h-4 bg-[#00363B] rounded mr-2"></div>
+                    <div className="w-1 h-4 bg-[#1e40af] rounded mr-2"></div>
                     OBJETIVO
                   </Label>
                   <Textarea
@@ -325,7 +325,7 @@ export default function ElaboradorTareaPage() {
                 {/* Alcance */}
                 <div className="flex flex-col gap-2 flex-1">
                   <Label className="text-sm font-bold text-gray-800 uppercase tracking-wide flex items-center">
-                    <div className="w-1 h-4 bg-[#00363B] rounded mr-2"></div>
+                    <div className="w-1 h-4 bg-[#1e40af] rounded mr-2"></div>
                     ALCANCE
                   </Label>
                   <Textarea
@@ -342,7 +342,7 @@ export default function ElaboradorTareaPage() {
                 {/* Desarrollo */}
                 <div className="flex flex-col gap-2 flex-[2]">
                   <Label className="text-sm font-bold text-gray-800 uppercase tracking-wide flex items-center">
-                    <div className="w-1 h-4 bg-[#00363B] rounded mr-2"></div>
+                    <div className="w-1 h-4 bg-[#1e40af] rounded mr-2"></div>
                     DESARROLLO
                   </Label>
                   <Textarea
@@ -435,7 +435,7 @@ export default function ElaboradorTareaPage() {
                   </Button>
                   <Button
                     onClick={handleSaveAndSend}
-                    className="bg-[#00363B] hover:bg-[#00363B]/90 text-white px-6 shadow-sm"
+                    className="bg-[#1e40af] hover:bg-[#1a237e] text-white px-6 shadow-sm"
                   >
                     <Send className="h-4 w-4 mr-2" />
                     {selectedRequest && isRevision(selectedRequest) ? "Enviar al Aprobador" : "Guardar y Enviar"}

@@ -9,8 +9,8 @@ import { Toaster } from "sonner"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Copeinca - Sistema de Gestión de Documentos",
-  description: "Sistema de gestión de documentos para Copeinca",
+  title: "Protecso - Sistema de Gestión de Documentos",
+  description: "Sistema de gestión de documentos para Protecso",
 }
 
 export default function RootLayout({

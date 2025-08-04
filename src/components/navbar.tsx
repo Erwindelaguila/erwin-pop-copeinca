@@ -22,9 +22,9 @@ export function Navbar() {
   const isActive = (path: string) => pathname === path
 
   return (
-    <nav className="bg-[#00363B] text-white px-6 py-4">
+    <nav className="bg-white text-indigo-900 px-6 py-4 shadow">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
-        <Image src="/logo-copeinca-write.png" alt="Copeinca" width={120} height={40} className="h-8 w-auto" />
+        <Image src="/logo-protecso.png" alt="PROTECSO" width={280} height={64} className="h-16 w-auto" />
 
         <div className="flex space-x-2 justify-center">
           <Link href={`/${state.user.role}`}>
@@ -32,8 +32,8 @@ export function Navbar() {
               variant="ghost"
               className={`px-6 py-2 rounded-md font-medium transition-colors ${
                 isActive(`/${state.user.role}`)
-                  ? "bg-white/20 text-white"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "bg-blue-900 text-white shadow-md"
+                  : "text-blue-900 hover:text-white hover:bg-blue-900"
               }`}
             >
               Solicitudes
@@ -44,8 +44,8 @@ export function Navbar() {
               variant="ghost"
               className={`px-6 py-2 rounded-md font-medium transition-colors ${
                 isActive(`/${state.user.role}/tarea`)
-                  ? "bg-white/20 text-white"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "bg-blue-900 text-white shadow-md"
+                  : "text-blue-900 hover:text-white hover:bg-blue-900"
               }`}
             >
               Tarea
@@ -57,7 +57,7 @@ export function Navbar() {
           variant="ghost"
           size="sm"
           onClick={handleLogout}
-          className="text-white hover:text-gray-200 hover:bg-white/10"
+          className="text-blue-900 hover:text-white hover:bg-blue-900"
         >
           <LogOut className="h-4 w-4" />
         </Button>

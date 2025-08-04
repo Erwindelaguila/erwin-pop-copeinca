@@ -306,8 +306,8 @@ export default function TimelinePage() {
       <div className="container mx-auto px-6 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
          
-          <Card className="border-l-4 border-l-[#00363B]">
-            <CardHeader className="bg-[#00363B] text-white">
+          <Card className="border-l-4 border-l-[#1e40af]">
+            <CardHeader className="bg-[#1e40af] text-white">
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-2xl font-bold">{document.numero}</CardTitle>
@@ -452,21 +452,21 @@ export default function TimelinePage() {
               <Card>
                 <CardContent className="p-6">
                   <div className="space-y-6">
-                    <div className="border-l-4 border-[#00363B] pl-4">
+                    <div className="border-l-4 border-[#1e40af] pl-4">
                       <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">OBJETIVO</h4>
                       <p className="text-gray-700 leading-relaxed">{document.objetivo || "No especificado"}</p>
                     </div>
-                    <div className="border-l-4 border-[#00363B] pl-4">
+                    <div className="border-l-4 border-[#1e40af] pl-4">
                       <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">ALCANCE</h4>
                       <p className="text-gray-700 leading-relaxed">{document.alcance || "No especificado"}</p>
                     </div>
-                    <div className="border-l-4 border-[#00363B] pl-4">
+                    <div className="border-l-4 border-[#1e40af] pl-4">
                       <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">DESARROLLO</h4>
                       <p className="text-gray-700 leading-relaxed">{document.desarrollo || "No especificado"}</p>
                     </div>
                   </div>
                   <div className="flex justify-end mt-6 pt-4 border-t border-gray-100">
-                    <Button onClick={handleViewPDF} className="bg-[#00363B] hover:bg-[#00363B]/90">
+                    <Button onClick={handleViewPDF} className="bg-[#1e40af] hover:bg-[#1a237e]">
                       <Download className="h-4 w-4 mr-2" />
                       Descargar PDF
                     </Button>
